@@ -1,8 +1,8 @@
 # find(): 对[xxx]{#abc}这样的写法标记书签
 # replace(): 对[@xxx]这样的写法引用书签
 # 可以实现对标题编号的引用
+# 引用嵌套采用域代码的形式进行引用
 # 写代码记得写注释！！！
-# TODO 引用嵌套怎么办？？？
 
 import panflute as pf
 
@@ -20,21 +20,32 @@ class refsReplacer():
             citation: pf.Citation = elem.citations[0]
             # pf.debug(citation.id)
             citationId: str = citation.id
-            if citation.id in self.bookmarks:
-                elem = pf.RawInline(
-                    f'<w:fldSimple w:instr=" REF {citation.id} \\h "/>',
-                    format="openxml")
-            elif citationId.startswith('sec-'):
-                # 对标题的编号引用处理 [@sec-xxx] [@sec-xxx-no]
-                if citationId.endswith('-no'):
-                    elem = pf.RawInline(f'<w:fldSimple w:instr=" REF {citationId[4:-3]} \\r \\h "/>',
+            if ':' in citationId:
+                # 有标识符，默认书签表示引用编号
+                if citationId in self.bookmarks:
+                    # 在书签中，无后缀，引用编号
+                    elem = pf.RawInline(
+                        f'<w:fldSimple w:instr=" REF {citationId} \\r \\h "/>',
+                        format="openxml")
+                elif citationId.endswith('-c'):
+                    # 引用内容
+                    elem = pf.RawInline(
+                        f'<w:fldSimple w:instr=" REF {citationId[:-2]} \\h "/>',
+                        format="openxml")
+            else:
+                # 无标识符，默认书签表示引用内容
+                if citationId in self.bookmarks:
+                    # 引用内容
+                    elem = pf.RawInline(
+                        f'<w:fldSimple w:instr=" REF {citationId} \\h "/>',
+                        format="openxml")
+                elif citationId.endswith('-no'):
+                    # 引用编号
+                    elem = pf.RawInline(f'<w:fldSimple w:instr=" REF {citationId[:-3]} \\r \\h "/>',
                                         format="openxml")
-                else:
-                    elem = pf.RawInline(f'<w:fldSimple w:instr=" REF {citationId[4:]} \\h "/>',
-                                        format="openxml")
-            elif citationId.startswith('page-'):
-                # 对页码的引用进行处理
-                elem = pf.RawInline(f'<w:fldSimple w:instr=" PAGEREF {citationId[5:]} \\h "/>',
+            if citationId.endswith('-page') and citationId[:-5] in self.bookmarks:
+                # 引用页码
+                elem = pf.RawInline(f'<w:fldSimple w:instr=" PAGEREF {citationId[:-5]} \\h "/>',
                                     format="openxml")
         return elem
 

@@ -8,6 +8,7 @@ from . import word_elements
 from . import parse_md
 from . import fieldCode
 from . import sugar_replace
+from . import meta
 import sys
 import panflute as pf
 

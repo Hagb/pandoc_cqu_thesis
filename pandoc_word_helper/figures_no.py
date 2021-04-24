@@ -1,16 +1,18 @@
 import panflute as pf
+from .meta import Meta
 import re
-top_level = 1
+top_level = Meta.chaptersDepth if Meta.chapters else ''
+figSeqName = Meta.figureTitle # 题注前缀的文字和SEQ的内容相同，以便于在Word中产生相同的前缀
 
 section_no = pf.RawInline(
     f'''<w:fldSimple w:instr=" STYLEREF {top_level} \s"/>''', format="openxml")
 figure_no = pf.RawInline(
-    f'''<w:fldSimple w:instr=" SEQ Figure \* ARABIC \s {top_level}"/>''',
+    f'''<w:fldSimple w:instr=" SEQ {figSeqName} \* ARABIC \s {top_level}"/>''',
     format="openxml")
 figure_no2 = pf.RawInline(
-    f'''<w:fldSimple w:instr=" SEQ Figure \c \* ARABIC \s {top_level} "/>''',
+    f'''<w:fldSimple w:instr=" SEQ {figSeqName} \c \* ARABIC \s {top_level} "/>''',
     format="openxml")
-# 重复上一个编号
+    # 重复上一个编号
 
 
 class FigCaptionReplace():
@@ -39,12 +41,13 @@ class FigCaptionReplace():
                 new_content = []
             else:
                 new_content = [
-                    pf.Str('图'), pf.Space,
-                    pf.Span(section_no,
-                            pf.Str('.'),
+                    # 题注前缀
+                    pf.Str(Meta.figureTitle),
+                    pf.Span(section_no if Meta.chapters else pf.Span(),
+                            pf.Str(Meta.chapDelim) if Meta.chapters else pf.Span(),
                             figure_no,
-                            identifier=elem.identifier
-                             if elem.identifier else ""), pf.Space
+                            identifier=elem.identifier if elem.identifier else ""),
+                    pf.Str(Meta.titleDelim)
                 ]
             new_content.append(
                 pf.Span(identifier=elem.identifier +
@@ -54,12 +57,14 @@ class FigCaptionReplace():
                 if isinstance(
                         elem1, pf.RawInline
                 ) and elem1.format == 'tex' and elem1.text == r'\Caption2{fig}':
+                     # 第二题注
                     new_content.append(pf.LineBreak)
-                    if not ('-' in elem.classes
-                            or 'unnumbered' in elem.classes):
-                        new_content.extend(
-                            (pf.Str('Fig.'), pf.Space, section_no, pf.Str('.'),
-                                figure_no2, pf.Space))
+                    if not ('-' in elem.classes or 'unnumbered' in elem.classes):
+                        new_content.extend([pf.Str(Meta.figureTitle2),
+                                section_no if Meta.chapters else pf.Span(),
+                                pf.Str(Meta.chapDelim) if Meta.chapters else pf.Span(),
+                                figure_no2,
+                                pf.Str(Meta.titleDelim)])
                     new_content.append(
                         pf.Span(identifier=elem.identifier +
                                 '-sc' if elem.identifier else ""))

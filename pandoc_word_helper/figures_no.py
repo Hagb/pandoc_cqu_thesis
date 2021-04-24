@@ -43,12 +43,12 @@ class FigCaptionReplace():
                     pf.Span(section_no,
                             pf.Str('.'),
                             figure_no,
-                            identifier=elem.identifier +
-                            '-no' if elem.identifier else ""), pf.Space
+                            identifier=elem.identifier
+                             if elem.identifier else ""), pf.Space
                 ]
             new_content.append(
                 pf.Span(identifier=elem.identifier +
-                        '-zh' if elem.identifier else ""))
+                        '-c' if elem.identifier else ""))
 
             for elem1 in elem.content:
                 if isinstance(
@@ -62,7 +62,7 @@ class FigCaptionReplace():
                                 figure_no2, pf.Space))
                     new_content.append(
                         pf.Span(identifier=elem.identifier +
-                                '-en' if elem.identifier else ""))
+                                '-sc' if elem.identifier else ""))
                     cap2_begin = True
                 else:
                     new_content[-1].content.append(elem1)

@@ -7,6 +7,16 @@
 import panflute as pf
 
 
+def refNumStr(citationId: str):
+    return pf.RawInline(f'<w:fldSimple w:instr=" REF {citationId} \\r \\h "/>',
+                        format="openxml")
+
+
+def refContentStr(citationId: str):
+    return pf.RawInline(f'<w:fldSimple w:instr=" REF {citationId} \\h "/>',
+                        format="openxml")
+
+
 class refsReplacer():
     def find(self, elem, doc=None):
         if hasattr(elem, 'identifier') and elem.identifier:
@@ -20,33 +30,31 @@ class refsReplacer():
             citation: pf.Citation = elem.citations[0]
             # pf.debug(citation.id)
             citationId: str = citation.id
-            if ':' in citationId:
-                # 有标识符，默认书签表示引用编号
-                if citationId in self.bookmarks:
-                    # 在书签中，无后缀，引用编号
-                    elem = pf.RawInline(
-                        f'<w:fldSimple w:instr=" REF {citationId} \\r \\h "/>',
-                        format="openxml")
-                elif citationId.endswith('-c'):
-                    # 引用内容
-                    elem = pf.RawInline(
-                        f'<w:fldSimple w:instr=" REF {citationId[:-2]} \\h "/>',
-                        format="openxml")
-            else:
-                # 无标识符，默认书签表示引用内容
-                if citationId in self.bookmarks:
-                    # 引用内容
-                    elem = pf.RawInline(
-                        f'<w:fldSimple w:instr=" REF {citationId} \\h "/>',
-                        format="openxml")
-                elif citationId.endswith('-no'):
-                    # 引用编号
-                    elem = pf.RawInline(f'<w:fldSimple w:instr=" REF {citationId[:-3]} \\r \\h "/>',
-                                        format="openxml")
             if citationId.endswith('-page') and citationId[:-5] in self.bookmarks:
                 # 引用页码
                 elem = pf.RawInline(f'<w:fldSimple w:instr=" PAGEREF {citationId[:-5]} \\h "/>',
                                     format="openxml")
+            elif ':' in citationId:
+                # 有标识符，视为编号项
+                preffix = citationId.split(':')[0]
+                if citationId in self.bookmarks:
+                    if preffix in ['eq', 'fig', 'tbl']:
+                        # 在书签中，且前缀为eq,fig等，直接代入内容获取编号
+                        elem = refContentStr(citationId)
+                    else:
+                        # 在书签中，常规编号项，sec，脚注等，引用编号
+                        elem = refNumStr(citationId)
+                elif citationId.endswith('-c') and citationId[:-2] in self.bookmarks:
+                    # 不在书签中，但去掉后缀在，只能是常规编号项了，引用内容
+                    elem = refContentStr(citationId[:-2])
+            else:
+                # 无标识符，默认书签表示引用内容
+                if citationId in self.bookmarks:
+                    # 引用内容
+                    elem = refContentStr(citationId)
+                elif citationId.endswith('-no'):
+                    # 引用编号
+                    elem = refNumStr(citationId[:-3])
         return elem
 
     def __init__(self):

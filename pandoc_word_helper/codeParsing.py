@@ -21,11 +21,13 @@ class CodeBlock():
         codeClass = elem.classes
         if Meta.codeBlockNumbering:
             return pf.OrderedList(*[pf.ListItem(pf.CodeBlock(line, classes=codeClass)) for line in s.split('\n')])
+        else:
+            return elem
 
     def codeSpaceVisible(self, elem):
         if Meta.codeSpaceVisible:
             elem.text = elem.text.replace(' ', '␣')
-            return elem
+        return elem
 
 
     def __init__(self) -> None:

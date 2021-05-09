@@ -2,6 +2,7 @@ import panflute as pf
 
 class Meta:
     codeBlockNumbering = True # 对代码块添加行号
+    codeSpaceVisible = False # 显示代码中的空格
 
     chapters = True # 编号chapter.item
     chaptersDepth = 2 # 标题编号深度，默认只有一级标题编号

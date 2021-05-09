@@ -9,7 +9,7 @@ from . import word_elements
 from . import parse_md
 from . import fieldCode
 from . import sugar_replace
-from . import codeBlockNumbering
+from . import codeParsing
 import sys
 import panflute as pf
 
@@ -23,7 +23,7 @@ def main(doc=None):
         from_exec = True
     else:
         from_exec = False
-    for mod in (parse_md, sugar_replace, fieldCode, header_convert, equations_no, figures_no, refs, word_elements, codeBlockNumbering):
+    for mod in (parse_md, sugar_replace, fieldCode, header_convert, equations_no, figures_no, refs, word_elements, codeParsing):
         doc = mod.main(doc=doc)
         if parse_md.parse_only:
             break

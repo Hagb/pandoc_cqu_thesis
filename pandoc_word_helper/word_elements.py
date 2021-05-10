@@ -1,6 +1,8 @@
 from . import texcommands
 import panflute as pf
 import sys
+from . import fieldCode
+import os
 
 inline_const_commands = {
     r'newLine':
@@ -46,6 +48,13 @@ def newSection(paramStr="", docinfo=None):
                        '</w:sectPr></w:pPr></w:p>', format='openxml')
 
 
+def includeDoc(path, docinfo=None):
+    path = os.path.abspath(path)
+    path.replace("\\", "\\\\")
+    path.replace('"', '\\')
+    return pf.RawBlock(fieldCode.fieldCode.genFieldXml('{IncludeText "' + path + '"}'), format="openxml")
+
+
 null_para = pf.Para(pf.Span())
 
 
@@ -58,7 +67,8 @@ inline_function_commands = {
 block_function_commands = {
     'newPara': lambda x="1", docinfo=None: [null_para] * (1 if x == "" else int(x)),
     'tocRaw': tocRaw,
-    'newSection': newSection
+    'newSection': newSection,
+    'includeDoc': includeDoc
 }
 
 

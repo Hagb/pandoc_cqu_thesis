@@ -38,7 +38,7 @@ class refsReplacer():
                 # 有标识符，视为编号项
                 preffix = citationId.split(':')[0]
                 if citationId in self.bookmarks:
-                    if preffix in ['eq', 'fig', 'tbl']:
+                    if preffix in ['eq', 'fig', 'tbl', 'def', 'thm']:
                         # 在书签中，且前缀为eq,fig等，直接代入内容获取编号
                         elem = refContentStr(citationId)
                     else:

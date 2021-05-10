@@ -52,7 +52,10 @@ def includeDoc(path, docinfo=None):
     path = os.path.abspath(path)
     path.replace("\\", "\\\\")
     path.replace('"', '\\')
-    return pf.RawBlock(fieldCode.fieldCode.genFieldXml('{IncludeText "' + path + '"}'), format="openxml")
+    return pf.RawBlock(
+        fieldCode.fieldCode.genFieldXml('{IncludeText "' + path + '"}',
+                                        isBlock=True),
+        format="openxml")
 
 
 null_para = pf.Para(pf.Span())

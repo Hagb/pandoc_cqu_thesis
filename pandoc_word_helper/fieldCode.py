@@ -14,16 +14,18 @@ import panflute as pf
 class fieldCode():
     def action(self, elem, doc):
         if isinstance(elem, pf.RawInline):
-            elem: pf.RawInline
             if elem.format in ["docx", "field"]:
                 return pf.RawInline(self.genFieldXml(elem.text), format='openxml')
+        if isinstance(elem, pf.RawBlock):
+            if elem.format in ["docx", "field"]:
+                return pf.RawBlock(self.genFieldXml(elem.text, isBlock=True), format='openxml')
 
     @staticmethod
-    def genFieldXml(fieldStr: str):
+    def genFieldXml(fieldStr: str, isBlock: bool = False):
         fieldStr: str = fieldStr.strip()
         if not (fieldStr.startswith('{') and fieldStr.endswith('}')):
-            return
-        result_str = """<w:r>"""
+            fieldStr = '{' + fieldStr + '}'
+        result_str = "<w:p><w:r>" if isBlock else "<w:r>"
         temp_str = ""
         flag = True  # 用来标定域代码，False代表域代码的显示文本
         for s in fieldStr:
@@ -48,7 +50,7 @@ class fieldCode():
                     result_str += """<w:instrText xml:space="preserve">%s</w:instrText>""" % temp_str
                 result_str += """<w:fldChar w:fldCharType="end"/>"""
                 temp_str = ""
-        return result_str + """</w:r>"""
+        return result_str + ("</w:r></w:p>" if isBlock else "</w:r>")
 
     def __init__(self) -> None:
         pass

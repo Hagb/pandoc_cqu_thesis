@@ -50,12 +50,12 @@ def newSection(paramStr="", docinfo=None):
 
 def includeDoc(path, docinfo=None):
     path = quoteattr(os.path.abspath(path).replace('\\', '\\\\'))
-    return pf.Para(
+    return pf.Div(pf.Para(
         pf.RawInline(
             '<w:pPr><w:ind w:firstLineChars="0" w:firstLine="0"/></w:pPr>'
             '<w:r><w:fldChar w:fldCharType="begin"/><w:instrText xml:space="preserve">'
             f'IncludeText {path}</w:instrText><w:fldChar w:fldCharType="end"/></w:r>', format="openxml"),
-    )
+    ), attributes={'custom-style': 'noindent'})
 
 
 null_para = pf.Para(pf.Span())

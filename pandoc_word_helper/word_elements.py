@@ -1,8 +1,8 @@
 from . import texcommands
 import panflute as pf
 import sys
-from . import fieldCode
 import os
+from xml.sax.saxutils import quoteattr
 
 inline_const_commands = {
     r'newLine':
@@ -49,13 +49,13 @@ def newSection(paramStr="", docinfo=None):
 
 
 def includeDoc(path, docinfo=None):
-    path = os.path.abspath(path)
-    path.replace("\\", "\\\\")
-    path.replace('"', '\\')
-    return pf.RawBlock(
-        fieldCode.fieldCode.genFieldXml('{IncludeText "' + path + '"}',
-                                        isBlock=True),
-        format="openxml")
+    path = quoteattr(os.path.abspath(path))
+    return pf.Para(
+        pf.RawInline(
+            '<w:pPr><w:ind w:firstLineChars="0" w:firstLine="0"/></w:pPr>'
+            '<w:r><w:fldChar w:fldCharType="begin"/><w:instrText xml:space="preserve">'
+            f'IncludeText {path}</w:instrText><w:fldChar w:fldCharType="end"/></w:r>', format="openxml"),
+    )
 
 
 null_para = pf.Para(pf.Span())

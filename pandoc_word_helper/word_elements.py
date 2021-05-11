@@ -49,7 +49,7 @@ def newSection(paramStr="", docinfo=None):
 
 
 def includeDoc(path, docinfo=None):
-    path = quoteattr(os.path.abspath(path))
+    path = quoteattr(os.path.abspath(path).replace('\\', '\\\\'))
     return pf.Para(
         pf.RawInline(
             '<w:pPr><w:ind w:firstLineChars="0" w:firstLine="0"/></w:pPr>'

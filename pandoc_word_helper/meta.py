@@ -12,7 +12,7 @@ class Meta:
     figureTitle = "图 "
     figureTitle2 = "Figure "
     tableTitle = "表"
-    tableTitle2 = "Table"
+    tableTitle2 = "Table "
     titleDelim = ' ' # 题注编号和题注文本直接的分隔符
 
     # 引用编号时的参数

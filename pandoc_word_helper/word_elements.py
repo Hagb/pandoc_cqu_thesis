@@ -58,6 +58,14 @@ def includeDoc(path, docinfo=None):
     ), attributes={'custom-style': 'noindent'})
 
 
+def metadataBlock(name, docinfo):
+    data = docinfo[1].metadata[name]
+    if isinstance(data, pf.MetaBlocks):
+        return list(data.content)
+    else:
+        return pf.Para(*data.content)
+
+
 null_para = pf.Para(pf.Span())
 
 
@@ -65,13 +73,17 @@ inline_function_commands = {
     'Space': lambda x, docinfo=None: [pf.Space()] * (1 if x == "" else int(x)),
     'KeyWord': lambda x, docinfo=None: pf.Span(pf.Str(x), attributes={'custom-style': 'Key Word'}),
     'refs': lambda x, docinfo=None: pf.RawInline(f'<w:fldSimple w:instr=" REF {x} \\h "/>', format="openxml"),
-    'Style': lambda x, docinfo=None: pf.RawInline(f'''<w:pPr><w:pStyle w:val="{x}"/></w:pPr>''', format='openxml')}
+    'Style': lambda x, docinfo=None: pf.RawInline(f'''<w:pPr><w:pStyle w:val="{x}"/></w:pPr>''', format='openxml'),
+    'metadata': lambda name, docinfo: list(docinfo[1].metadata[name].content),
+    'metadataStr': lambda name, docinfo: pf.Str(str(docinfo[1].get_metadata(name)))
+}
 
 block_function_commands = {
     'newPara': lambda x="1", docinfo=None: [null_para] * (1 if x == "" else int(x)),
     'tocRaw': tocRaw,
     'newSection': newSection,
-    'includeDoc': includeDoc
+    'includeDoc': includeDoc,
+    'metadata': metadataBlock
 }
 
 

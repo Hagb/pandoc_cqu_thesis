@@ -18,16 +18,19 @@ class CodeBlock():
         elem: pf.CodeBlock
         s = elem.text
         codeClass = elem.classes
-        if Meta.codeBlockNumbering:
+        if self.meta.codeBlockNumbering:
             lines = s.split('\n')
-            if len(lines) > Meta.codeBlockNumberingMinLine:
+            if len(lines) > self.meta.codeBlockNumberingMinLine:
                 return pf.OrderedList(*[pf.ListItem(pf.CodeBlock(line, classes=codeClass)) for line in lines])
         return elem
 
     def codeSpaceVisible(self, elem):
-        if Meta.codeSpaceVisible:
+        if self.meta.codeSpaceVisible:
             elem.text = elem.text.replace(' ', '␣')
         return elem
+
+    def prepare(self, doc):
+        self.meta = Meta(doc)
 
     def __init__(self) -> None:
         pass
@@ -35,7 +38,7 @@ class CodeBlock():
 
 def main(doc=None):
     replacer = CodeBlock()
-    return pf.run_filter(replacer.action, doc=doc)
+    return pf.run_filter(replacer.action, prepare=replacer.prepare, doc=doc)
 
 
 if __name__ == "__main__":

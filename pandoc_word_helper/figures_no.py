@@ -1,18 +1,6 @@
 import panflute as pf
-from .meta import Meta
+from .meta import Meta as Meta
 import re
-top_level = Meta.chaptersDepth if Meta.chapters else ''
-figSeqName = Meta.figureTitle # 题注前缀的文字和SEQ的内容相同，以便于在Word中产生相同的前缀
-
-section_no = pf.RawInline(
-    f'''<w:fldSimple w:instr=" STYLEREF {top_level} \s"/>''', format="openxml")
-figure_no = pf.RawInline(
-    f'''<w:fldSimple w:instr=" SEQ {figSeqName} \* ARABIC \s {top_level}"/>''',
-    format="openxml")
-figure_no2 = pf.RawInline(
-    f'''<w:fldSimple w:instr=" SEQ {figSeqName} \c \* ARABIC \s {top_level} "/>''',
-    format="openxml")
-    # 重复上一个编号
 
 
 class FigCaptionReplace():
@@ -42,12 +30,13 @@ class FigCaptionReplace():
             else:
                 new_content = [
                     # 题注前缀
-                    pf.Str(Meta.figureTitle),
-                    pf.Span(section_no if Meta.chapters else pf.Span(),
-                            pf.Str(Meta.chapDelim) if Meta.chapters else pf.Span(),
-                            figure_no,
+                    pf.Str(self.meta.figureTitle),
+                    pf.Span(self.section_no if self.meta.chapters else pf.Span(),
+                            pf.Str(
+                                self.meta.chapDelim) if self.meta.chapters else pf.Span(),
+                            self.figure_no,
                             identifier=elem.identifier if elem.identifier else ""),
-                    pf.Str(Meta.titleDelim)
+                    pf.Str(self.meta.titleDelim)
                 ]
             new_content.append(
                 pf.Span(identifier=elem.identifier +
@@ -57,14 +46,15 @@ class FigCaptionReplace():
                 if isinstance(
                         elem1, pf.RawInline
                 ) and elem1.format == 'tex' and elem1.text == r'\Caption2{fig}':
-                     # 第二题注
+                    # 第二题注
                     new_content.append(pf.LineBreak)
                     if not ('-' in elem.classes or 'unnumbered' in elem.classes):
-                        new_content.extend([pf.Str(Meta.figureTitle2),
-                                section_no if Meta.chapters else pf.Span(),
-                                pf.Str(Meta.chapDelim) if Meta.chapters else pf.Span(),
-                                figure_no2,
-                                pf.Str(Meta.titleDelim)])
+                        new_content.extend([pf.Str(self.meta.figureTitle2),
+                                            self.section_no if self.meta.chapters else pf.Span(),
+                                            pf.Str(
+                                                self.meta.chapDelim) if self.meta.chapters else pf.Span(),
+                                            self.figure_no2,
+                                            pf.Str(self.meta.titleDelim)])
                     new_content.append(
                         pf.Span(identifier=elem.identifier +
                                 '-sc' if elem.identifier else ""))
@@ -75,13 +65,28 @@ class FigCaptionReplace():
 
             return elem
 
+    def prepare(self, doc):
+        self.meta = Meta(doc)
+        self.top_level = self.meta.chaptersDepth if self.meta.chapters else ''
+        self.figSeqName = self.meta.figureTitle  # 题注前缀的文字和SEQ的内容相同，以便于在Word中产生相同的前缀
+
+        self.section_no = pf.RawInline(
+            f'''<w:fldSimple w:instr=" STYLEREF {self.top_level} \\s"/>''', format="openxml")
+        self.figure_no = pf.RawInline(
+            f'''<w:fldSimple w:instr=" SEQ {self.figSeqName} \\* ARABIC \\s {self.top_level}"/>''',
+            format="openxml")
+        self.figure_no2 = pf.RawInline(
+            f'''<w:fldSimple w:instr=" SEQ {self.figSeqName} \\c \\* ARABIC \\s {self.top_level} "/>''',
+            format="openxml")
+        # 重复上一个编号
+
     def __init__(self):
         pass
 
 
 def main(doc=None):
     replacer = FigCaptionReplace()
-    return pf.run_filter(replacer.action, doc=doc)
+    return pf.run_filter(replacer.action, prepare=replacer.prepare, doc=doc)
 
 
 if __name__ == "__main__":

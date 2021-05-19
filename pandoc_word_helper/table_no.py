@@ -1,44 +1,45 @@
 import panflute as pf
 from .meta import Meta
 import re
+anchor_re = re.compile(r'{#([^}]+)}')
 
 
 class TableCaptionReplace():
-    def __init__(self):
-        top_level = Meta.chaptersDepth if Meta.chapters else ''
-        tableSeqName = Meta.tableTitle  # 题注前缀的文字和SEQ的内容相同，以便于在Word中产生相同的前缀
-        self.anchor_re = re.compile(r'{#([^}]+)}')
+    def prepare(self, doc):
+        self.meta = Meta(doc)
+        self.top_level = self.meta.chaptersDepth if self.meta.chapters else ''
+        self.tableSeqName = self.meta.tableTitle  # 题注前缀的文字和SEQ的内容相同，以便于在Word中产生相同的前缀
 
         self.section_no = pf.RawInline(
-            f'''<w:fldSimple w:instr=" STYLEREF {top_level} \s"/>''', format="openxml")
+            f'''<w:fldSimple w:instr=" STYLEREF {self.top_level} \\s"/>''', format="openxml")
         self.table_no = pf.RawInline(
-            f'''<w:fldSimple w:instr=" SEQ {tableSeqName} \* ARABIC \s {top_level}"/>''',
+            f'''<w:fldSimple w:instr=" SEQ {self.tableSeqName} \\* ARABIC \\s {self.top_level}"/>''',
             format="openxml")
         self.table_no2 = pf.RawInline(
-            f'''<w:fldSimple w:instr=" SEQ {tableSeqName} \c \* ARABIC \s {top_level} "/>''',
+            f'''<w:fldSimple w:instr=" SEQ {self.tableSeqName} \\c \\* ARABIC \\s {self.top_level} "/>''',
             format="openxml")
         # 重复上一个编号
 
     def generateTableNumber(self, identifier=''):
         # 创建表格编号
         return [
-            pf.Str(Meta.tableTitle),
-            pf.Span(self.section_no if Meta.chapters else pf.Span(),
-                    pf.Str(Meta.chapDelim) if Meta.chapters else pf.Span(),
+            pf.Str(self.meta.tableTitle),
+            pf.Span(self.section_no if self.meta.chapters else pf.Span(),
+                    pf.Str(self.meta.chapDelim) if self.meta.chapters else pf.Span(),
                     self.table_no,
                     identifier=identifier),
-            pf.Str(Meta.titleDelim)
+            pf.Str(self.meta.titleDelim)
         ]
 
     def generateTableNumber2(self, identifier=''):
         # 创建表格编号
         return [
-            pf.Str(Meta.tableTitle2),
-            pf.Span(self.section_no if Meta.chapters else pf.Span(),
-                    pf.Str(Meta.chapDelim) if Meta.chapters else pf.Span(),
+            pf.Str(self.meta.tableTitle2),
+            pf.Span(self.section_no if self.meta.chapters else pf.Span(),
+                    pf.Str(self.meta.chapDelim) if self.meta.chapters else pf.Span(),
                     self.table_no2,
                     ),
-            pf.Str(Meta.titleDelim)
+            pf.Str(self.meta.titleDelim)
         ]
 
     def isSecondCaptionSeparator(self, item):
@@ -77,10 +78,13 @@ class TableCaptionReplace():
                     break
             # 生成二级题注
             if hasSecondCaption:
-                firstCaption = pf.Span(*captionContent[:secondCaptionIndex], identifier=identifier+"-c" if hasIdentifier else '')
-                secondCaption = pf.Span(*captionContent[secondCaptionIndex+1:], identifier=identifier+'-sc' if hasIdentifier else '')
+                firstCaption = pf.Span(
+                    *captionContent[:secondCaptionIndex], identifier=identifier+"-c" if hasIdentifier else '')
+                secondCaption = pf.Span(
+                    *captionContent[secondCaptionIndex+1:], identifier=identifier+'-sc' if hasIdentifier else '')
             else:
-                firstCaption = pf.Span(*captionContent, identifier=identifier+"-c" if hasIdentifier else '')
+                firstCaption = pf.Span(
+                    *captionContent, identifier=identifier+"-c" if hasIdentifier else '')
 
             # 生成新的题注内容
             new_caption = []
@@ -100,7 +104,7 @@ class TableCaptionReplace():
 
 def main(doc=None):
     replacer = TableCaptionReplace()
-    return pf.run_filter(replacer.action, doc=doc)
+    return pf.run_filter(replacer.action, prepare=replacer.prepare, doc=doc)
 
 
 if __name__ == "__main__":

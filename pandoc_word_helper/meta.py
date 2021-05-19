@@ -2,6 +2,7 @@ import panflute as pf
 
 class Meta:
     codeBlockNumbering = True # 对代码块添加行号
+    codeBlockNumberingMinLine = 3 # 显示行号的最小代码块行数（最小0）
     codeSpaceVisible = False # 显示代码中的空格
 
     chapters = True # 编号chapter.item

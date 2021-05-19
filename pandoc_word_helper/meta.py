@@ -5,14 +5,15 @@ class Meta:
     codeSpaceVisible = False # 显示代码中的空格
 
     chapters = True # 编号chapter.item
-    chaptersDepth = 2 # 标题编号深度，默认只有一级标题编号
+    chaptersDepth = 1 # 标题编号深度，默认只有一级标题编号
     autoEqnLabels = True # 自动公式编号
     tableEqns = True # 用表格编号公式，在预览时有效
 
-    figureTitle = "图片 "
+    figureTitle = "图 "
     figureTitle2 = "Figure "
-    tableTitle = "Table"
-    titleDelim = ':' # 题注编号和题注文本直接的分隔符
+    tableTitle = "表"
+    tableTitle2 = "Table"
+    titleDelim = ' ' # 题注编号和题注文本直接的分隔符
 
     # 引用编号时的参数
     figPrefix = "图"

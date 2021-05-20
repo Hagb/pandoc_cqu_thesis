@@ -5,12 +5,6 @@ top_level = 1
 equation_width = 0.7
 
 
-def valign_block(width):
-    return pf.RawBlock(
-        f'<w:tcPr><w:vAlign w:val="center"/><w:tcW w:w="{width}" w:type="pct"/></w:tcPr>',
-        format="openxml")
-
-
 section_no = pf.RawInline(
     f'''<w:fldSimple w:instr=" STYLEREF {top_level} \s"/>''', format="openxml")
 equation_no = pf.RawInline(
@@ -59,6 +53,8 @@ class MathReplace():
                     continue
             content_group.append([is_math, [elem1]])
         elem_old = elem
+
+        # 开始生成输出表格
         elem = []
         first_para = True
         for elem_group in content_group:
@@ -99,34 +95,68 @@ class MathReplace():
                             pf.Str(')'),
                             identifier=tag)
                 ] if not notag else []
-
-                rows.append(
-                    pf.TableRow(
-                        pf.TableCell(
-                            valign_block(50 * (1 - equation_width))),
-                        pf.TableCell(
-                            valign_block(100 * equation_width),
+                # 封装一行
+                rows.extend([
+                    *self.tableRow(
+                        *self.tableCell(
+                            self.tableCellPr(50 * (1 - equation_width)),
+                            pf.Para()
+                        ),
+                        *self.tableCell(
+                            self.tableCellPr(100 * equation_width),
                             pf.Div(pf.Para(math_elem),
                                    attributes={
                                 'custom-style': 'Equation'
                             })),
-                        pf.TableCell(
-                            valign_block(50 * (1 - equation_width)),
+                        *self.tableCell(
+                            self.tableCellPr(50 * (1 - equation_width)),
                             pf.Div(pf.Para(*math_caption),
                                    attributes={
                                 'custom-style':
                                 'Equation Caption'
-                            }))))
+                            }))
+                    )])
                 self.math_no += 1
-            elem.append(
-                pf.Table(pf.TableBody(*rows),
-                         colspec=[
-                    ('AlignLeft', (1 - equation_width) / 2),
-                    ('AlignLeft', equation_width),
-                    ('AlignRight', (1 - equation_width) / 2)
-                ],
-                    caption=pf.Caption(pf.Div())))
+            elem.extend(self.table(*rows))
+            # pf.debug(elem)
+        # pf.debug(elem)
         return elem
+
+    def tableRow(self, *tableCell: pf.Block):
+        return [pf.RawBlock('<w:tr>', format='openxml'),
+                *tableCell,
+                pf.RawBlock('</w:tr>', format='openxml')
+                ]
+
+    def tableCell(self, *blocks: pf.Block):
+        return [pf.RawBlock('<w:tc>', format='openxml'),
+                *blocks,
+                pf.RawBlock('</w:tc>', format='openxml')
+                ]
+
+    def table(self, *tableRow: pf.Block):
+        return [pf.RawBlock('<w:tbl>', format='openxml'),
+                pf.RawBlock('''
+            <w:tblPr>
+                <w:tblStyle w:val="EquationTable" />
+                <w:tblW w:type="pct" w:w="5000" />
+                <w:tblLook w:firstRow="0" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" w:noHBand="0" w:noVBand="0" w:val="0000" />
+            </w:tblPr>
+            <w:tblGrid>
+                <w:gridCol w:w="1308"/>
+                <w:gridCol w:w="6104"/>
+                <w:gridCol w:w="1308"/>
+            </w:tblGrid>
+            ''', format='openxml'),
+                *tableRow,
+                pf.RawBlock('</w:tbl>', format='openxml'),
+                ]
+
+    def tableCellPr(self, width):
+        return pf.RawBlock(
+            f'<w:tcPr><w:tcW w:w="{width}" w:type="pct"/></w:tcPr>',
+            format="openxml")
+
 
     def __init__(self):
         pass

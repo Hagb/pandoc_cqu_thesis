@@ -100,7 +100,7 @@ class MathReplace():
                     *self.tableRow(
                         *self.tableCell(
                             self.tableCellPr(50 * (1 - equation_width)),
-                            pf.Para()
+                            pf.Para(pf.Space)
                         ),
                         *self.tableCell(
                             self.tableCellPr(100 * equation_width),
@@ -110,7 +110,7 @@ class MathReplace():
                             })),
                         *self.tableCell(
                             self.tableCellPr(50 * (1 - equation_width)),
-                            pf.Div(pf.Para(*math_caption),
+                            pf.Div(pf.Para(*math_caption, pf.Space()),
                                    attributes={
                                 'custom-style':
                                 'Equation Caption'
@@ -122,19 +122,22 @@ class MathReplace():
         # pf.debug(elem)
         return elem
 
-    def tableRow(self, *tableCell: pf.Block):
+    @staticmethod
+    def tableRow(*tableCell: pf.Block):
         return [pf.RawBlock('<w:tr>', format='openxml'),
                 *tableCell,
                 pf.RawBlock('</w:tr>', format='openxml')
                 ]
 
-    def tableCell(self, *blocks: pf.Block):
+    @staticmethod
+    def tableCell(*blocks: pf.Block):
         return [pf.RawBlock('<w:tc>', format='openxml'),
                 *blocks,
                 pf.RawBlock('</w:tc>', format='openxml')
                 ]
 
-    def table(self, *tableRow: pf.Block):
+    @staticmethod
+    def table(*tableRow: pf.Block):
         return [pf.RawBlock('<w:tbl>', format='openxml'),
                 pf.RawBlock('''
             <w:tblPr>
@@ -152,11 +155,11 @@ class MathReplace():
                 pf.RawBlock('</w:tbl>', format='openxml'),
                 ]
 
-    def tableCellPr(self, width):
+    @staticmethod
+    def tableCellPr(width):
         return pf.RawBlock(
             f'<w:tcPr><w:tcW w:w="{width}" w:type="pct"/></w:tcPr>',
             format="openxml")
-
 
     def __init__(self):
         pass

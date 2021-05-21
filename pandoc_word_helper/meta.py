@@ -39,10 +39,29 @@ class Meta:
     eqPrefix = '('
     eqSuffix = ')'
 
+    proof = "证明："
+    proofQed = "□"
+
+    theoremSeparator = '：'
+    theoremPrefix = '（'
+    theoremSuffix = '）'
+    theorems = {'assumption': '假设',
+                'axiom': '公理',
+                'conjecture': '猜想',
+                'corollary': '推论',
+                'definition': '定义',
+                'example': '例',
+                'exercise': '练习',
+                'lemma': '引理',
+                'problem': '问题',
+                'proposition': '命题',
+                'remark': '注释',
+                'theorem': '定理'}
+
     def __init__(self, doc: pf.Doc):
         metadata = doc.get_metadata()
         for name in metadata:
             data = type(getattr(self, name))(metadata[name]) if hasattr(
                 self, name) else metadata[name]
             setattr(self, name, data)
-            # pf.debug(name, getattr(self, name))
+

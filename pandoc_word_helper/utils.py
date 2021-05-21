@@ -18,6 +18,11 @@ def stripLabel(elems):
     if match:
         for i in range(len(label_strs)):
             elems.pop()
+        for i in elems[::-1]:
+            if isinstance(i, pf.Space):
+                elems.pop()
+            else:
+                break
         return {
             'identifier': match[1+2] or match[1],
             'classes': [i[1:] or 'nonumbered' for i in match.captures(2) + match.captures(2+2)],

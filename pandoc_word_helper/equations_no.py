@@ -91,13 +91,13 @@ class MathReplace():
                         notag = False
                         tag = ''
                 math_caption = [
-                    pf.Str('('),
+                    pf.Str(self.meta.eqPrefix),
                     pf.Span(
                         self.section_no,
                         pf.Str(self.meta.chapDelim),
                         self.equation_no,
                         identifier=tag),
-                    pf.Str(')')
+                    pf.Str(self.meta.eqSuffix)
                 ] if not notag else []
                 # 封装一行
                 rows.extend([

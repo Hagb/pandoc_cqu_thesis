@@ -1,5 +1,5 @@
 import panflute as pf
-from .meta import Meta as Meta
+from .meta import Meta
 import re
 
 

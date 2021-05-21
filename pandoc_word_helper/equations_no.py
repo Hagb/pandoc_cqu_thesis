@@ -100,7 +100,7 @@ class MathReplace():
                     *self.tableRow(
                         *self.tableCell(
                             self.tableCellPr(50 * (1 - equation_width)),
-                            pf.Para(pf.Space)
+                            pf.Para(pf.Span())
                         ),
                         *self.tableCell(
                             self.tableCellPr(100 * equation_width),

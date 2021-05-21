@@ -17,7 +17,7 @@ class TableCaptionReplace():
         self.table_no2 = pf.RawInline(
             f'''<w:fldSimple w:instr=" SEQ {self.tableSeqName} \\c \\* ARABIC \\s {self.top_level} "/>''',
             format="openxml")
-        # 重复上一个编号
+            # 重复上一个编号
 
     def generateTableNumber(self, identifier=''):
         # 创建表格编号
@@ -54,7 +54,7 @@ class TableCaptionReplace():
             # 表格的题注内容长度为0，则表格题注无内容
             # 若表格无题注，则直接返回表格，不做处理
             if len(elem.caption.content) == 0:
-                return [elem, pf.Para(pf.Space())]
+                return [elem, pf.Para(pf.Span()) if self.meta.isParaAfterTable else pf.Null()]
 
             # 获取题注元素
             captionContent = elem.caption.content[0].content
@@ -78,7 +78,7 @@ class TableCaptionReplace():
             else:
                 hasSecondCaption = False
 
-            # 生成二级题注
+            # 生成两级题注的文本内容
             if hasSecondCaption:
                 firstCaption = pf.Span(
                     *captionContent[:secondCaptionIndex], identifier=identifier+"-c" if identifier else '')
@@ -88,7 +88,7 @@ class TableCaptionReplace():
                 firstCaption = pf.Span(
                     *captionContent, identifier=identifier+"-c" if identifier else '')
 
-            # 生成新的题注内容
+            # 用两级题注的内容和表格编号生成新的题注内容
             new_caption = []
             if isNeedNumber:
                 new_caption.extend(self.generateTableNumber(identifier))
@@ -101,7 +101,7 @@ class TableCaptionReplace():
 
             elem.caption.content[0].content = pf.ListContainer(*new_caption)
 
-            return [elem, pf.Para(pf.Space())]
+            return [elem, pf.Para(pf.Span()) if self.meta.isParaAfterTable else pf.Null()]
 
 
 def main(doc=None):

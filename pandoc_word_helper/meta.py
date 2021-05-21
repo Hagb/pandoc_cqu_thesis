@@ -24,9 +24,12 @@ class Meta:
     secPrefix = "节"
     chapDelim = '.'  # 编号chapter.item中间的“点”
 
+    isParaAfterTable = False # 表格之后是否自动生成空段落（CQU的格式要求）
+
     def __init__(self, doc: pf.Doc):
         metadata = doc.get_metadata()
         for name in metadata:
             data = type(getattr(self, name))(metadata[name]) if hasattr(
                 self, name) else metadata[name]
             setattr(self, name, data)
+            # pf.debug(name, getattr(self, name))

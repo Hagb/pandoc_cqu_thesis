@@ -114,7 +114,7 @@ class MathReplace():
                             })),
                         *self.tableCell(
                             self.tableCellPr(50 * (1 - equation_width)),
-                            pf.Div(pf.Para(*math_caption),
+                            pf.Div(pf.Para(pf.Span(), *math_caption),
                                    attributes={
                                 'custom-style':
                                 'Equation Caption'

@@ -114,7 +114,7 @@ class MathReplace():
                             })),
                         *self.tableCell(
                             self.tableCellPr(50 * (1 - equation_width)),
-                            pf.Div(pf.Para(pf.Space(), *math_caption),
+                            pf.Div(pf.Para(*math_caption),
                                    attributes={
                                 'custom-style':
                                 'Equation Caption'
@@ -142,18 +142,17 @@ class MathReplace():
 
     @staticmethod
     def table(*tableRow: pf.Block):
+        # tblPr > tblW 属性w:w="5000"以为表格总宽度为5000
+        # tcPr > tcW 属性w:w="xxx" xxx换算为相对5000的百分比，故5000的15%为750
+        # tblPr > tblLook 中对应表格的各项外观，这里使用第一列和最后一列两个参数来控制首尾
         return [pf.RawBlock('<w:tbl>', format='openxml'),
                 pf.RawBlock('''
             <w:tblPr>
                 <w:tblStyle w:val="EquationTable" />
                 <w:tblW w:type="pct" w:w="5000" />
-                <w:tblLook w:firstRow="0" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" w:noHBand="0" w:noVBand="0" w:val="0000" />
+                <w:tblLook w:firstRow="0" w:lastRow="0" w:firstColumn="1" w:lastColumn="1" w:noHBand="0" w:noVBand="0" w:val="0000" />
             </w:tblPr>
-            <w:tblGrid>
-                <w:gridCol w:w="1308"/>
-                <w:gridCol w:w="6104"/>
-                <w:gridCol w:w="1308"/>
-            </w:tblGrid>
+            <w:tblGrid />
             ''', format='openxml'),
                 *tableRow,
                 pf.RawBlock('</w:tbl>', format='openxml'),
@@ -162,7 +161,7 @@ class MathReplace():
     @staticmethod
     def tableCellPr(width):
         return pf.RawBlock(
-            f'<w:tcPr><w:tcW w:w="{width}" w:type="pct"/></w:tcPr>',
+            f'<w:tcPr><w:tcW w:w="{50*int(width)}" w:type="pct"/></w:tcPr>',
             format="openxml")
 
     def __init__(self):

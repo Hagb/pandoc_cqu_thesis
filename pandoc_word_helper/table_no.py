@@ -1,7 +1,6 @@
 import panflute as pf
 from .meta import Meta
 from . import utils
-import regex
 
 
 class TableCaptionReplace():

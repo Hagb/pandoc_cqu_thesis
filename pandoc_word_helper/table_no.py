@@ -1,7 +1,7 @@
 import panflute as pf
 from .meta import Meta
-import re
-anchor_re = re.compile(r'{#([^}]+)}')
+from . import utils
+import regex
 
 
 class TableCaptionReplace():
@@ -55,19 +55,19 @@ class TableCaptionReplace():
             # 表格的题注内容长度为0，则表格题注无内容
             # 若表格无题注，则直接返回表格，不做处理
             if len(elem.caption.content) == 0:
-                return elem
-
-            # 判断是否编号
-            # TODO 在这里检测是否需要编号，是否存在标签，以及去掉标签返回剩下的内容
-            isNeedNumber = True
-            hasIdentifier = False
-            captionStr: str = pf.stringify(elem.caption)  # 这里得到题注的纯文本
-            if captionStr.endswith("{-}"):
-                isNeedNumber = False
-            identifier = ""  # 从上面获取到标签，以供下面使用
+                return [elem, pf.Para(pf.Space())]
 
             # 获取题注元素
             captionContent = elem.caption.content[0].content
+
+            # 判断是否编号
+            # TODO 在这里检测是否需要编号，是否存在标签，以及去掉标签返回剩下的内容
+            isNeedNumber = True  # 这里得到题注的纯文本
+            identifier = ""
+            Label = utils.stripLabel(captionContent)
+            if Label:
+                identifier = Label['identifier']
+                isNeedNumber = 'nonumbered' not in Label['classes']
 
             # 判断是否存在第二题注
             for item in captionContent:
@@ -76,15 +76,18 @@ class TableCaptionReplace():
                     hasSecondCaption = True
                     secondCaptionIndex = item.index
                     break
+            else:
+                hasSecondCaption = False
+
             # 生成二级题注
             if hasSecondCaption:
                 firstCaption = pf.Span(
-                    *captionContent[:secondCaptionIndex], identifier=identifier+"-c" if hasIdentifier else '')
+                    *captionContent[:secondCaptionIndex], identifier=identifier+"-c" if identifier else '')
                 secondCaption = pf.Span(
-                    *captionContent[secondCaptionIndex+1:], identifier=identifier+'-sc' if hasIdentifier else '')
+                    *captionContent[secondCaptionIndex+1:], identifier=identifier+'-sc' if identifier else '')
             else:
                 firstCaption = pf.Span(
-                    *captionContent, identifier=identifier+"-c" if hasIdentifier else '')
+                    *captionContent, identifier=identifier+"-c" if identifier else '')
 
             # 生成新的题注内容
             new_caption = []
@@ -99,7 +102,7 @@ class TableCaptionReplace():
 
             elem.caption.content[0].content = pf.ListContainer(*new_caption)
 
-            return elem
+            return [elem, pf.Para(pf.Space())]
 
 
 def main(doc=None):

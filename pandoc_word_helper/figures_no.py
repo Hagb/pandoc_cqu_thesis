@@ -45,7 +45,7 @@ class FigCaptionReplace():
             for elem1 in elem.content:
                 if isinstance(
                         elem1, pf.RawInline
-                ) and elem1.format == 'tex' and elem1.text == r'\Caption2{fig}':
+                ) and elem1.format == 'tex' and elem1.text == self.meta.secondCaptionSeparator:
                     # 第二题注
                     new_content.append(pf.LineBreak)
                     if not ('-' in elem.classes or 'unnumbered' in elem.classes):

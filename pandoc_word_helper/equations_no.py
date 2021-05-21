@@ -1,23 +1,26 @@
 import panflute as pf
+from .meta import Meta
 import copy
 import re
 top_level = 1
 equation_width = 0.7
 
 
-section_no = pf.RawInline(
-    f'''<w:fldSimple w:instr=" STYLEREF {top_level} \s"/>''', format="openxml")
-equation_no = pf.RawInline(
-    f'''<w:fldSimple w:instr=" SEQ Equation \* ARABIC \s {top_level}"/>''',
-    format="openxml")
-figure_no = pf.RawInline(
-    f'''<w:fldSimple w:instr=" SEQ Figure \* ARABIC \s {top_level}"/>''',
-    format="openxml")
-
-
 class MathReplace():
     math_no = 1
     anchor_re = re.compile(r'{#([^}]+)}')
+
+    def prepare(self, doc):
+        self.meta = Meta(doc)
+        self.top_level = self.meta.chaptersDepth if self.meta.chapters else ''
+        self.section_no = pf.RawInline(
+            f'''<w:fldSimple w:instr=" STYLEREF {self.top_level} \s"/>''', format="openxml")
+        self.equation_no = pf.RawInline(
+            f'''<w:fldSimple w:instr=" SEQ Equation \* ARABIC \s {self.top_level}"/>''',
+            format="openxml")
+        self.figure_no = pf.RawInline(
+            f'''<w:fldSimple w:instr=" SEQ Figure \* ARABIC \s {self.top_level}"/>''',
+            format="openxml")
 
     def action(self, elem, doc):
         # pf.debug('s:', elem)
@@ -88,12 +91,13 @@ class MathReplace():
                         notag = False
                         tag = ''
                 math_caption = [
-                    pf.Span(pf.Str('('),
-                            section_no,
-                            pf.Str('.'),
-                            equation_no,
-                            pf.Str(')'),
-                            identifier=tag)
+                    pf.Str('('),
+                    pf.Span(
+                        self.section_no,
+                        pf.Str(self.meta.chapDelim),
+                        self.equation_no,
+                        identifier=tag),
+                    pf.Str(')')
                 ] if not notag else []
                 # 封装一行
                 rows.extend([
@@ -167,7 +171,7 @@ class MathReplace():
 
 def main(doc=None):
     replacer = MathReplace()
-    return pf.run_filter(replacer.action, doc=doc)
+    return pf.run_filter(replacer.action, prepare=replacer.prepare, doc=doc)
 
 
 if __name__ == "__main__":

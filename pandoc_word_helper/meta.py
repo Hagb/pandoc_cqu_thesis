@@ -24,6 +24,7 @@ class Meta:
     secPrefix = "节"
     chapDelim = '.'  # 编号chapter.item中间的“点”
 
+    secondCaptionSeparator = r"\sc{}" # 双语题注的第二题注的分隔符
     isParaAfterTable = False # 表格之后是否自动生成空段落（CQU的格式要求）
 
     def __init__(self, doc: pf.Doc):

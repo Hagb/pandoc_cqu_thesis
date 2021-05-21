@@ -42,7 +42,7 @@ class TableCaptionReplace():
         ]
 
     def isSecondCaptionSeparator(self, item):
-        return isinstance(item, pf.RawInline) and item.format == 'tex' and item.text == r'\Caption2{tbl}'
+        return isinstance(item, pf.RawInline) and item.format == 'tex' and item.text == self.meta.secondCaptionSeparator
 
     def action(self, elem, doc):
         if isinstance(elem, pf.Table):

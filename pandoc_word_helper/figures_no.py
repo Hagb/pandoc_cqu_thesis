@@ -40,7 +40,7 @@ class FigCaptionReplace():
                 ]
             new_content.append(
                 pf.Span(identifier=elem.identifier +
-                        '-c' if elem.identifier else ""))
+                        ':c' if elem.identifier else ""))
 
             for elem1 in elem.content:
                 if isinstance(
@@ -57,7 +57,7 @@ class FigCaptionReplace():
                                             pf.Str(self.meta.titleDelim)])
                     new_content.append(
                         pf.Span(identifier=elem.identifier +
-                                '-sc' if elem.identifier else ""))
+                                ':sc' if elem.identifier else ""))
                     cap2_begin = True
                 else:
                     new_content[-1].content.append(elem1)

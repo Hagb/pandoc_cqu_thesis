@@ -59,9 +59,9 @@ class TableCaptionReplace():
             # 获取题注元素
             captionContent = elem.caption.content[0].content
 
-            # 判断是否编号
-            # TODO 在这里检测是否需要编号，是否存在标签，以及去掉标签返回剩下的内容
-            isNeedNumber = True  # 这里得到题注的纯文本
+            # 判断是否编号，是否存在书签
+            # 在这里检测是否需要编号，是否存在标签，以及去掉标签返回剩下的内容
+            isNeedNumber = True
             identifier = ""
             Label = utils.stripLabel(captionContent)
             if Label:
@@ -81,12 +81,12 @@ class TableCaptionReplace():
             # 生成两级题注的文本内容
             if hasSecondCaption:
                 firstCaption = pf.Span(
-                    *captionContent[:secondCaptionIndex], identifier=identifier+"-c" if identifier else '')
+                    *captionContent[:secondCaptionIndex], identifier=identifier+":c" if identifier else '')
                 secondCaption = pf.Span(
-                    *captionContent[secondCaptionIndex+1:], identifier=identifier+'-sc' if identifier else '')
+                    *captionContent[secondCaptionIndex+1:], identifier=identifier+':sc' if identifier else '')
             else:
                 firstCaption = pf.Span(
-                    *captionContent, identifier=identifier+"-c" if identifier else '')
+                    *captionContent, identifier=identifier+":c" if identifier else '')
 
             # 用两级题注的内容和表格编号生成新的题注内容
             new_caption = []

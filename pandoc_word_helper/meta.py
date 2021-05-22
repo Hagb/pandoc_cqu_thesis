@@ -28,7 +28,8 @@ class Meta:
     figPrefix = "图"
     eqnPrefix = "式"
     tblPrefix = "表"
-    secPrefix = "节"
+    secPrefix = "§"
+    pagePrefix = "p. "
 
     secondCaptionSeparator = r"\sc{}"  # 双语题注的第二题注的分隔符
     isParaAfterTable = False  # 表格之后是否自动生成空段落（CQU的格式要求）
@@ -64,4 +65,3 @@ class Meta:
             data = type(getattr(self, name))(metadata[name]) if hasattr(
                 self, name) else metadata[name]
             setattr(self, name, data)
-

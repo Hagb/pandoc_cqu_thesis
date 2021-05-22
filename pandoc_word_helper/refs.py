@@ -1,3 +1,4 @@
+from .meta import Meta
 # find(): 找出文档中所有的书签
 # replace(): 对[@xxx]这样的写法引用书签
 # 可以实现对标题编号的引用
@@ -17,26 +18,54 @@ def refContentStr(citationId: str):
                         format="openxml")
 
 
+def refPage(citationId):
+    return pf.RawInline(f'<w:fldSimple w:instr=" PAGEREF {citationId} \\h "/>',
+                        format="openxml")
+
+
 class refsReplacer():
+    def prepare(self, doc):
+        self.bookmarks = set()
+        self.bookmarks_prefix = {}
+        self.meta = Meta(doc)
+        # 已知的以书签“内容”作为编号的前缀
+        self.knownContentPrefix = {
+            'eq': self.meta.eqnPrefix,
+            'fig': self.meta.figPrefix,
+            'tbl': self.meta.tblPrefix,
+            # 'def':self.meta.?
+        }
+        # 已知的以书签“内容”作为“内容”的前缀
+        self.knownNumPrefix = {
+            # 'lst': self.meta.? ,
+            'sec': self.meta.secPrefix
+        }
+
     def find(self, elem, doc=None):
         # 获取所有书签
-        if hasattr(elem, 'identifier') and elem.identifier:
-            self.bookmarks.add(elem.identifier)
+        if getattr(elem, 'identifier', ''):
+            prefix = getattr(elem, 'attributes', {}).get('_prefix')
+            if prefix:
+                self.bookmarks_prefix[elem.identifier] = prefix
+            else:
+                self.bookmarks.add(elem.identifier)
             # pf.debug('anchor:', elem.identifier)
-        return elem
 
     def replace(self, elem, doc):
-        if isinstance(elem, pf.Cite):
-            elem: pf.Cite
-            citation: pf.Citation = elem.citations[0]
+        if not isinstance(elem, pf.Cite):
+            return
+        elem: pf.Cite
+        results = []
+        for n, citation in enumerate(elem.citations):
             # pf.debug(citation.id)
             citationId: str = citation.id
+            """
             if citationId not in self.bookmarks:
-            # 如果不在书签列表中，只有3种情况
-            # 有":page"后缀
-            # 有":c"后缀
-            # 有":no"后缀
-            # 其余情况全部不管，原路返回
+                # 如果不在书签列表中，只有3种情况
+                # 有":page"后缀
+                # 有":c"后缀
+                # 有":no"后缀
+                # 其余情况全部不管，原路返回
                 # 如果以":page"结尾，说明是引用页码
                 if citationId.endswith(':page') and citationId[:-5] in self.bookmarks:
                     elem = pf.RawInline(f'<w:fldSimple w:instr=" PAGEREF {citationId[:-5]} \\h "/>',
@@ -51,8 +80,8 @@ class refsReplacer():
                 elif citationId.endswith(':no') and citationId[:-3] in self.bookmarks:
                     elem = refNumStr(citationId[:-3])
             else:
-            # 如果在书签列表中
-            # 如果":"不在字符串中，说明没有前缀也没有后缀，那么只能以书签内容作为内容进行引用，避免出错
+                # 如果在书签列表中
+                # 如果":"不在字符串中，说明没有前缀也没有后缀，那么只能以书签内容作为内容进行引用，避免出错
                 # 可能是**最常规的书签引用**的内容
                 # 可能是没有加前缀的题注的编号
                 # 可能是没有前缀的编号段落的段落内容（这种情况下只能通过"xxx:no"的形式进行引用得到编号）
@@ -68,7 +97,7 @@ class refsReplacer():
             # 1. 可能是题注等以内容作为编号的情况，需要返回其内容
                 # TODO 根据不同的引用语法返回不同的“前缀字符”，只有存在正确的前缀的情况下，才能在引用的时候返回“前缀字符”
                 elif citationId.split(':')[0] in self.knownContentPrefix:
-                        elem = refContentStr(citationId)
+                    elem = refContentStr(citationId)
             # 2. 可能是标题等编号段落，需要返回其编号
                 elif citationId.split(':')[0] in self.knownNumPrefix:
                     elem = refNumStr(citationId)
@@ -76,20 +105,65 @@ class refsReplacer():
                 # 直接返回对内容的引用
                 else:
                     elem = refContentStr(citationId)
-        return elem
-
-    def __init__(self):
-        self.bookmarks = set()
-        # 已知的以书签“内容”作为编号的前缀
-        self.knownContentPrefix = ['eq', 'fig', 'tbl', 'def', 'thm']
-        # 已知的以书签“内容”作为“内容”的前缀
-        self.knownNumPrefix = ['lst', 'sec']
+            """
+            result = []
+            prefix = ''
+            label_parts = citationId.split(':')
+            if citationId in self.bookmarks_prefix:
+                prefix = self.bookmarks_prefix[citationId]
+                result = [
+                    refContentStr(citationId)
+                ]
+            elif len(label_parts) >= 3 and label_parts[-1] in ('sc', 'c'):
+                if label_parts[0] in self.knownNumPrefix:
+                    result = [refContentStr(':'.join(label_parts[:-1]))]
+                else:
+                    result = [refContentStr(citationId)]
+            elif len(label_parts) >= 2:
+                if label_parts[-1] == 'page':
+                    prefix = self.meta.pagePrefix
+                    result = [refPage(':'.join(label_parts[:-1]))]
+                elif label_parts[-1] == 'no':
+                    prefix = self.knownNumPrefix['sec']
+                    result = [refNumStr(':'.join(label_parts[:-1]))]
+                elif label_parts[0] in self.knownNumPrefix:
+                    prefix = self.knownNumPrefix[label_parts[0]]
+                    result = [refNumStr(citationId)]
+                elif label_parts[0] in self.knownContentPrefix:
+                    prefix = self.knownContentPrefix[label_parts[0]]
+                    result = [
+                        refContentStr(citationId)
+                    ]
+            if not result:
+                if citationId in self.bookmarks:
+                    result = [refContentStr(citationId)]
+                else:
+                    if results and isinstance(results[-1], pf.Citation):
+                        results[-1].citations.append(citation)
+                    else:
+                        cite = pf.Cite()
+                        cite.citations.append(citation)
+                        if n:
+                            results.extend([pf.Str(','), pf.Space])
+                        results.append(cite)
+                    continue
+            if n:
+                results.extend([pf.Str(','), pf.Space])
+            if citation.mode == 'SuppressAuthor' or citation.prefix:
+                prefix = ""
+            results.extend(
+                [*citation.prefix,
+                 pf.Str(prefix),
+                 *result,
+                 *citation.suffix]
+            )
+        return results
 
 
 def main(doc=None):
 
     refs_replacer = refsReplacer()
-    return pf.run_filters([refs_replacer.find, refs_replacer.replace], doc=doc)
+    return pf.run_filters([refs_replacer.find, refs_replacer.replace], prepare=refs_replacer.prepare, doc=doc)
 
 
 if __name__ == "__main__":

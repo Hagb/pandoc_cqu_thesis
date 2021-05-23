@@ -34,7 +34,7 @@ class Theorem():
                 pf.Space,
                 pf.Span(
                     self.section_no,
-                    pf.Str(self.meta.chapDelim),
+                    pf.Str(self.chapDelim),
                     self.theoremNumber(thm),
                     identifier=identifier,
                     attributes={'_prefix': self.meta.theorems[thm]}
@@ -61,8 +61,9 @@ class Theorem():
     def prepare(self, doc):
         self.meta = Meta(doc)
         self.top_level = self.meta.chaptersDepth if self.meta.chapters else ''
-
+        self.chapDelim = self.top_level and self.meta.chapDelim
         self.section_no = pf.RawInline(
+            self.top_level and
             f'''<w:fldSimple w:instr=" STYLEREF {self.top_level} \\s"/>''', format="openxml")
 
     def theoremNumber(self, thm):

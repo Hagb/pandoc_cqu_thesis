@@ -31,9 +31,8 @@ class FigCaptionReplace():
                 new_content = [
                     # 题注前缀
                     pf.Str(self.meta.figureTitle),
-                    pf.Span(self.section_no if self.meta.chapters else pf.Span(),
-                            pf.Str(
-                                self.meta.chapDelim) if self.meta.chapters else pf.Span(),
+                    pf.Span(self.section_no,
+                            pf.Str(self.chapDelim),
                             self.figure_no,
                             identifier=elem.identifier if elem.identifier else ""),
                     pf.Str(self.meta.titleDelim)
@@ -50,9 +49,8 @@ class FigCaptionReplace():
                     new_content.append(pf.LineBreak)
                     if not ('-' in elem.classes or 'unnumbered' in elem.classes):
                         new_content.extend([pf.Str(self.meta.figureTitle2),
-                                            self.section_no if self.meta.chapters else pf.Span(),
-                                            pf.Str(
-                                                self.meta.chapDelim) if self.meta.chapters else pf.Span(),
+                                            self.section_no,
+                                            pf.Str(self.chapDelim),
                                             self.figure_no2,
                                             pf.Str(self.meta.titleDelim)])
                     new_content.append(
@@ -69,8 +67,9 @@ class FigCaptionReplace():
         self.meta = Meta(doc)
         self.top_level = self.meta.chaptersDepth if self.meta.chapters else ''
         self.figSeqName = self.meta.figureTitle  # 题注前缀的文字和SEQ的内容相同，以便于在Word中产生相同的前缀
-
+        self.chapDelim = self.top_level and self.meta.chapDelim
         self.section_no = pf.RawInline(
+            self.top_level and
             f'''<w:fldSimple w:instr=" STYLEREF {self.top_level} \\s"/>''', format="openxml")
         self.figure_no = pf.RawInline(
             f'''<w:fldSimple w:instr=" SEQ {self.figSeqName} \\* ARABIC \\s {self.top_level}"/>''',

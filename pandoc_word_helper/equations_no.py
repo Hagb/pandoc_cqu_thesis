@@ -13,13 +13,12 @@ class MathReplace():
     def prepare(self, doc):
         self.meta = Meta(doc)
         self.top_level = self.meta.chaptersDepth if self.meta.chapters else ''
+        self.chapDelim = self.top_level and self.meta.chapDelim
         self.section_no = pf.RawInline(
-            f'''<w:fldSimple w:instr=" STYLEREF {self.top_level} \s"/>''', format="openxml")
+            self.top_level and
+            f'''<w:fldSimple w:instr=" STYLEREF {self.top_level} \\s"/>''', format="openxml")
         self.equation_no = pf.RawInline(
-            f'''<w:fldSimple w:instr=" SEQ Equation \* ARABIC \s {self.top_level}"/>''',
-            format="openxml")
-        self.figure_no = pf.RawInline(
-            f'''<w:fldSimple w:instr=" SEQ Figure \* ARABIC \s {self.top_level}"/>''',
+            f'''<w:fldSimple w:instr=" SEQ Equation \\* ARABIC \\s {self.top_level}"/>''',
             format="openxml")
 
     def action(self, elem, doc):
@@ -55,7 +54,6 @@ class MathReplace():
                     content_group[-1][1].append(elem1)
                     continue
             content_group.append([is_math, [elem1]])
-        elem_old = elem
 
         # 开始生成输出表格
         elem = []
@@ -94,7 +92,7 @@ class MathReplace():
                     pf.Str(self.meta.eqPrefix),
                     pf.Span(
                         self.section_no,
-                        pf.Str(self.meta.chapDelim),
+                        pf.Str(self.chapDelim),
                         self.equation_no,
                         identifier=tag),
                     pf.Str(self.meta.eqSuffix)

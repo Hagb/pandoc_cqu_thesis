@@ -8,17 +8,21 @@ class Proof():
     def action(self, elem, doc):
         if isinstance(elem, pf.Div) and 'proof' in elem.classes:
             proof_header = pf.Para(
-                pf.Str(self.meta.proof),
+                pf.Span(pf.Str(self.meta.proof), attributes={
+                        'custom-style': 'Definition Preffix'}),
             )
             if isinstance(elem.content[0], pf.Para):
                 proof_header.content.extend(elem.content[0].content)
                 elem.content = elem.content[1:]
-            qed = [word_elements.inline_const_commands['tabR'], pf.Str(self.meta.proofQed)]
+            qed = [word_elements.inline_const_commands['tabR'],
+                   pf.Str(self.meta.proofQed)]
             if isinstance(elem.content[-1], pf.Para):
                 elem.content[-1].content.extend(qed)
             else:
                 elem.content.append(pf.Para(*qed))
-            return [proof_header, *elem.content]
+            proof_body = pf.Div(
+                *elem.content, attributes={'custom-style': 'Definition'})
+            return [proof_header, proof_body]
 
     def prepare(self, doc):
         self.meta = Meta(doc)

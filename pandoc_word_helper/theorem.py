@@ -41,22 +41,31 @@ class Theorem():
                 ),
                 pf.Space
             ]
+            thm_prefix = pf.Span(
+                pf.Str(self.meta.theorems[thm]),
+                *thm_number,
+                attributes={'custom-style': 'Definition Preffix'}
+            )
             caption_elems = [] if not caption else [
                 pf.Str(self.meta.theoremPrefix),
-                pf.Span(*caption, identifier=identifier and (identifier + ':c')),
+                pf.Span(
+                    *caption,
+                    identifier=identifier and (identifier + ':c'),
+                    attributes={'custom-style': 'Definition Title'}
+                ),
                 *reference,
                 pf.Str(self.meta.theoremSuffix)
             ]
             thm_body = [pf.Para(*i.content[0].content) if isinstance(i.content[0], pf.Plain)
                         else i.content[0] for i in elem.content[0].definitions]
-            thm_header = pf.Para(pf.Str(self.meta.theorems[thm]),
-                                 *thm_number,
+            thm_header = pf.Para(thm_prefix,
                                  pf.Str(self.meta.theoremSeparator),
                                  *caption_elems)
             if isinstance(thm_body[0], pf.Para):
                 thm_header.content.extend(thm_body[0].content)
                 thm_body = thm_body[1:]
-            return [thm_header, *thm_body]
+            thm_body = pf.Div(*thm_body, attributes={'custom-style': 'Definition'})
+            return [thm_header, thm_body]
 
     def prepare(self, doc):
         self.meta = Meta(doc)

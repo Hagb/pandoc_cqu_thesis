@@ -8,8 +8,9 @@ class TableCaptionReplace():
         self.meta = Meta(doc)
         self.top_level = self.meta.chaptersDepth if self.meta.chapters else ''
         self.tableSeqName = self.meta.tableTitle  # 题注前缀的文字和SEQ的内容相同，以便于在Word中产生相同的前缀
-
+        self.chapDelim = self.top_level and self.meta.chapDelim
         self.section_no = pf.RawInline(
+            self.top_level and
             f'''<w:fldSimple w:instr=" STYLEREF {self.top_level} \\s"/>''', format="openxml")
         self.table_no = pf.RawInline(
             f'''<w:fldSimple w:instr=" SEQ {self.tableSeqName} \\* ARABIC \\s {self.top_level}"/>''',
@@ -23,8 +24,8 @@ class TableCaptionReplace():
         # 创建表格编号
         return [
             pf.Str(self.meta.tableTitle),
-            pf.Span(self.section_no if self.meta.chapters else pf.Span(),
-                    pf.Str(self.meta.chapDelim) if self.meta.chapters else pf.Span(),
+            pf.Span(self.section_no,
+                    pf.Str(self.chapDelim),
                     self.table_no,
                     identifier=identifier),
             pf.Str(self.meta.titleDelim)
@@ -34,8 +35,8 @@ class TableCaptionReplace():
         # 创建表格编号
         return [
             pf.Str(self.meta.tableTitle2),
-            pf.Span(self.section_no if self.meta.chapters else pf.Span(),
-                    pf.Str(self.meta.chapDelim) if self.meta.chapters else pf.Span(),
+            pf.Span(self.section_no,
+                    pf.Str(self.chapDelim),
                     self.table_no2,
                     ),
             pf.Str(self.meta.titleDelim)

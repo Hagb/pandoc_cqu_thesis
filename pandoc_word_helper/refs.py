@@ -146,6 +146,7 @@ class refsReplacer():
                     result = [refNumStr(citationId)]
                 elif label_parts[0] in self.knownContentPrefix:
                     prefix = self.knownContentPrefix[label_parts[0]]
+                    suffix = self.knownContentSuffix[label_parts[0]]
                     result = [
                         refContentStr(citationId)
                     ]

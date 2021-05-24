@@ -1,11 +1,12 @@
 [tool.poetry]
 name = "pandoc_word_helper"
-version = "0.12.0"
+version = "0.14.0"
 description = ""
 authors = ["Hagb Green <hagb_green@qq.com>", "ilcpm <ilcpm@outlook.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.6"
+pip = ">=20.0.0"
 panflute = ">=2.0"
 regex = "^2021.4.4"
 

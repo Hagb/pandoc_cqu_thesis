@@ -43,7 +43,7 @@ def tocRaw(title='', format=r'TOC \o "1-3" \h \z \u', docinfo=None):
     ] if title else TOC
 
 
-def newSection(paramStr="", docinfo=None):
+def newSectionRaw(paramStr="", docinfo=None):
     return pf.RawBlock('<w:p><w:pPr><w:sectPr>' + paramStr +
                        '</w:sectPr></w:pPr></w:p>', format='openxml')
 
@@ -81,7 +81,7 @@ inline_function_commands = {
 block_function_commands = {
     'newPara': lambda x="1", docinfo=None: [null_para] * (1 if x == "" else int(x)),
     'tocRaw': tocRaw,
-    'newSection': newSection,
+    'newSectionRaw': newSectionRaw,
     'includeDoc': includeDoc,
     'metadata': metadataBlock
 }

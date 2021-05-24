@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pandoc_word_helper"
-version = "0.14.0"
+version = "0.14.2"
 description = ""
 authors = ["Hagb Green <hagb_green@qq.com>", "ilcpm <ilcpm@outlook.com>"]
 

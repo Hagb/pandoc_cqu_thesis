@@ -31,7 +31,7 @@ class Theorem():
             identifier = label['identifier'] or ''
             nonumber = 'nonumbered' in label['classes']
             thm_number = [] if nonumber else [
-                pf.Space,
+                # pf.Space,
                 pf.Span(
                     self.section_no,
                     pf.Str(self.chapDelim),
@@ -39,7 +39,7 @@ class Theorem():
                     identifier=identifier,
                     attributes={'_prefix': self.meta.theorems[thm]}
                 ),
-                pf.Space
+                # pf.Space
             ]
             thm_prefix = pf.Span(
                 pf.Str(self.meta.theorems[thm]),
@@ -59,8 +59,8 @@ class Theorem():
             thm_body = [pf.Para(*i.content[0].content) if isinstance(i.content[0], pf.Plain)
                         else i.content[0] for i in elem.content[0].definitions]
             thm_header = pf.Para(thm_prefix,
-                                 pf.Str(self.meta.theoremSeparator),
-                                 *caption_elems)
+                                 *caption_elems,
+                                 pf.Str(self.meta.theoremSeparator))
             if isinstance(thm_body[0], pf.Para):
                 thm_header.content.extend(thm_body[0].content)
                 thm_body = thm_body[1:]

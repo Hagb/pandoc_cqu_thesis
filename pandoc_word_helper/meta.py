@@ -48,12 +48,12 @@ class Meta:
     eqPrefix = '('
     eqSuffix = ')'
 
-    proof = "证明："
+    proof = "证明　"
     proofQed = "□"
 
-    theoremSeparator = '：'
-    theoremPrefix = '（'
-    theoremSuffix = '）'
+    theoremSeparator = '　'
+    theoremPrefix = '('
+    theoremSuffix = ')'
     theorems = {'assumption': '假设',
                 'axiom': '公理',
                 'conjecture': '猜想',

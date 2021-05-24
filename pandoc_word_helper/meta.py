@@ -26,10 +26,18 @@ class Meta:
 
     # 引用编号时的参数
     figPrefix = "图"
-    eqnPrefix = "式"
+    eqnPrefix = "("
     tblPrefix = "表"
     secPrefix = "§"
     pagePrefix = "p. "
+    lstPrefix = "第 "
+
+    figSuffix = ""
+    eqnSuffix = ")"
+    tblSuffix = ""
+    secSuffix = ""
+    pageSuffix = ""
+    lstSuffix = " 项"
 
     secondCaptionSeparator = r"\sc{}"  # 双语题注的第二题注的分隔符
     isParaAfterTable = False  # 表格之后是否自动生成空段落（CQU的格式要求）

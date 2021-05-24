@@ -26,7 +26,7 @@ def refPage(citationId):
 class refsReplacer():
     def prepare(self, doc):
         self.bookmarks = set()
-        self.bookmarks_prefix = {}
+        self.bookmarks_custom = {}
         self.meta = Meta(doc)
         # 已知的以书签“内容”作为编号的前缀
         self.knownContentPrefix = {
@@ -35,18 +35,29 @@ class refsReplacer():
             'tbl': self.meta.tblPrefix,
             # 'def':self.meta.?
         }
+        self.knownContentSuffix = {
+            'eq': self.meta.eqnSuffix,
+            'fig': self.meta.figSuffix,
+            'tbl': self.meta.tblSuffix,
+            # 'def':self.meta.?
+        }
         # 已知的以书签“内容”作为“内容”的前缀
         self.knownNumPrefix = {
-            # 'lst': self.meta.? ,
+            'lst': self.meta.lstPrefix,
             'sec': self.meta.secPrefix
+        }
+        self.knownNumSuffix = {
+            'lst': self.meta.lstSuffix,
+            'sec': self.meta.secSuffix
         }
 
     def find(self, elem, doc=None):
         # 获取所有书签
         if getattr(elem, 'identifier', ''):
-            prefix = getattr(elem, 'attributes', {}).get('_prefix')
-            if prefix:
-                self.bookmarks_prefix[elem.identifier] = prefix
+            prefix = getattr(elem, 'attributes', {}).get('_prefix', '')
+            suffix = getattr(elem, 'attributes', {}).get('_suffix', '')
+            if prefix or suffix:
+                self.bookmarks_custom[elem.identifier] = [prefix, suffix]
             else:
                 self.bookmarks.add(elem.identifier)
             # pf.debug('anchor:', elem.identifier)
@@ -108,9 +119,10 @@ class refsReplacer():
             """
             result = []
             prefix = ''
+            suffix = ''
             label_parts = citationId.split(':')
-            if citationId in self.bookmarks_prefix:
-                prefix = self.bookmarks_prefix[citationId]
+            if citationId in self.bookmarks_custom:
+                prefix, suffix = self.bookmarks_custom[citationId]
                 result = [
                     refContentStr(citationId)
                 ]
@@ -122,12 +134,15 @@ class refsReplacer():
             elif len(label_parts) >= 2:
                 if label_parts[-1] == 'page':
                     prefix = self.meta.pagePrefix
+                    suffix = self.meta.pageSuffix
                     result = [refPage(':'.join(label_parts[:-1]))]
                 elif label_parts[-1] == 'no':
                     prefix = self.knownNumPrefix['sec']
+                    suffix = self.knownNumSuffix['sec']
                     result = [refNumStr(':'.join(label_parts[:-1]))]
                 elif label_parts[0] in self.knownNumPrefix:
                     prefix = self.knownNumPrefix[label_parts[0]]
+                    suffix = self.knownNumSuffix[label_parts[0]]
                     result = [refNumStr(citationId)]
                 elif label_parts[0] in self.knownContentPrefix:
                     prefix = self.knownContentPrefix[label_parts[0]]
@@ -149,12 +164,14 @@ class refsReplacer():
                     continue
             if n:
                 results.extend([pf.Str(','), pf.Space])
-            if citation.mode == 'SuppressAuthor' or citation.prefix:
+            if citation.mode == 'SuppressAuthor' or citation.prefix or citation.suffix:
                 prefix = ""
+                suffix = ""
             results.extend(
                 [*citation.prefix,
                  pf.Str(prefix),
                  *result,
+                 pf.Str(suffix),
                  *citation.suffix]
             )
         return results

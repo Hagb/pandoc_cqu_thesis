@@ -14,6 +14,7 @@ from . import codeParsing
 from . import horizontal_noindent
 from . import theorem
 from . import proof
+from . import plainListElem
 import sys
 import panflute as pf
 
@@ -27,8 +28,9 @@ def main(doc=None):
         from_exec = True
     else:
         from_exec = False
-    for mod in (parse_md, sugar_replace, fieldCode, header_convert, theorem, proof, table_no,
-                equations_no, figures_no, refs, word_elements, horizontal_noindent, codeParsing):
+    for mod in (parse_md, sugar_replace, fieldCode, header_convert, theorem,
+                proof, table_no, figures_no, refs, word_elements,
+                horizontal_noindent, codeParsing, equations_no, plainListElem):
         doc = mod.main(doc=doc)
         if parse_md.parse_only:
             break

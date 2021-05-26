@@ -14,8 +14,8 @@ class Proof():
                         # attributes={'custom-style': 'Definition Preffix'}
                         )
             ), attributes={'custom-style': 'Definition Term'})
-            qed = [word_elements.inline_const_commands['tabR'],
-                   pf.Str(self.meta.proofQed)]
+            qed = [] if self.meta.proofQed != '' else [
+                word_elements.inline_const_commands['tabR'], pf.Str(self.meta.proofQed)]
             if isinstance(elem.content[-1], pf.Para):
                 elem.content[-1].content.extend(qed)
             else:

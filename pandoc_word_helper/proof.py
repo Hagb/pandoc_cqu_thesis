@@ -7,20 +7,22 @@ from . import word_elements
 class Proof():
     def action(self, elem, doc):
         if isinstance(elem, pf.Div) and 'proof' in elem.classes:
-            proof_header = pf.Para(
-                pf.Span(pf.Str(self.meta.proof), attributes={
-                        'custom-style': 'Definition Preffix'}),
-            )
-            if isinstance(elem.content[0], pf.Para):
-                proof_header.content.extend(elem.content[0].content)
-                elem.content = elem.content[1:]
+            proof_header = pf.Div(pf.Para(
+                pf.Span() if not self.meta.combineDefinitionTerm else pf.RawInline(
+                    r'<w:pPr><w:rPr><w:vanish/><w:specVanish/></w:rPr></w:pPr>', format='openxml'),
+                pf.Span(pf.Str(self.meta.proof),
+                        # attributes={'custom-style': 'Definition Preffix'}
+                        )
+            ), attributes={'custom-style': 'Definition Term'})
             qed = [word_elements.inline_const_commands['tabR'],
                    pf.Str(self.meta.proofQed)]
             if isinstance(elem.content[-1], pf.Para):
                 elem.content[-1].content.extend(qed)
             else:
                 elem.content.append(pf.Para(*qed))
-            return pf.Div(proof_header, *elem.content, attributes={'custom-style': 'Definition'})
+            proof_body = pf.Div(
+                *elem.content, attributes={'custom-style': 'Definition'})
+            return [proof_header, proof_body]
 
     def prepare(self, doc):
         self.meta = Meta(doc)

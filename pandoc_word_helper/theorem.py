@@ -44,27 +44,30 @@ class Theorem():
             thm_prefix = pf.Span(
                 pf.Str(self.meta.theorems[thm]),
                 *thm_number,
-                attributes={'custom-style': 'Definition Preffix'}
+                # attributes={'custom-style': 'Definition Preffix'}
             )
             caption_elems = [] if not caption else [
                 pf.Str(self.meta.theoremPrefix),
                 pf.Span(
                     *caption,
                     identifier=identifier and (identifier + ':c'),
-                    attributes={'custom-style': 'Definition Title'}
+                    # attributes={'custom-style': 'Definition Title'}
                 ),
                 *reference,
                 pf.Str(self.meta.theoremSuffix)
             ]
-            thm_body = [pf.Para(*i.content[0].content) if isinstance(i.content[0], pf.Plain)
-                        else i.content[0] for i in elem.content[0].definitions]
-            thm_header = pf.Para(thm_prefix,
-                                 *caption_elems,
-                                 pf.Str(self.meta.theoremSeparator))
-            if isinstance(thm_body[0], pf.Para):
-                thm_header.content.extend(thm_body[0].content)
-                thm_body = thm_body[1:]
-            return pf.Div(thm_header, *thm_body, attributes={'custom-style': 'Definition'})
+            thm_header = pf.Div(pf.Para(
+                pf.Span() if not self.meta.combineDefinitionTerm else pf.RawInline(
+                    r'<w:pPr><w:rPr><w:vanish/><w:specVanish/></w:rPr></w:pPr>', format='openxml'),
+                thm_prefix,
+                *caption_elems,
+                pf.Str(self.meta.theoremSeparator)),
+                attributes={'custom-style': 'Definition Term'}
+            )
+            thm_body = pf.Div(*[pf.Para(*i.content[0].content) if isinstance(i.content[0], pf.Plain)
+                                else i.content[0] for i in elem.content[0].definitions],
+                              attributes={'custom-style': 'Definition'})
+            return [thm_header, thm_body]
 
     def prepare(self, doc):
         self.meta = Meta(doc)

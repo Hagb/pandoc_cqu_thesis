@@ -23,8 +23,9 @@ class MathReplace():
 
     def action(self, elem, doc):
         # pf.debug('s:', elem)
-        if not isinstance(elem, pf.Para):
+        if not isinstance(elem, (pf.Para, pf.Plain)):
             return
+        origin_type = type(elem)
         rows = []
         content_group = []
         for elem1 in elem.content:
@@ -54,16 +55,30 @@ class MathReplace():
                     content_group[-1][1].append(elem1)
                     continue
             content_group.append([is_math, [elem1]])
+        if len(content_group) == 1 and not content_group[0][0]:
+            return
+        parent_elem = elem
+        noindent = isinstance(elem, pf.Para)
+        while parent_elem:
+            if isinstance(parent_elem, (pf.TableCell)):
+                return
+            if isinstance(parent_elem, (pf.ListItem, pf.DefinitionItem)):
+                noindent = False
+                pf.debug(elem)
+            parent_elem = parent_elem.parent
 
         # 开始生成输出表格
         elem = []
         first_para = True
         for elem_group in content_group:
             if not elem_group[0]:
-                if not first_para:
-                    elem_group[1] = [pf.RawInline('<w:pPr><w:ind w:firstLineChars="0" w:firstLine="0"/></w:pPr>', format="openxml"),
-                                     *elem_group[1]]
-                elem_new = pf.Para(*elem_group[1])
+                if noindent and not first_para:
+                    elem_group[1] = [
+                        pf.RawInline(
+                            '<w:pPr><w:ind w:firstLineChars="0" w:firstLine="0"/></w:pPr>', format="openxml"),
+                        *elem_group[1]
+                    ]
+                elem_new = origin_type(*elem_group[1])
                 elem.append(elem_new)
                 first_para = False
                 continue

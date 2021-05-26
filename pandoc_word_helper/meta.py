@@ -48,6 +48,8 @@ class Meta:
     eqPrefix = '('
     eqSuffix = ')'
 
+    # 定理环境相关
+    combineDefinitionTerm = True # 用Word中Crtl Alt Enter产生的能够合并两个段落的特殊段落标记合并定理的编号和内容
     proof = "证明　"
     proofQed = "□"
 

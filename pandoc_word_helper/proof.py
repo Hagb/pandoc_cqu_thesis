@@ -20,9 +20,7 @@ class Proof():
                 elem.content[-1].content.extend(qed)
             else:
                 elem.content.append(pf.Para(*qed))
-            proof_body = pf.Div(
-                *elem.content, attributes={'custom-style': 'Definition'})
-            return [proof_header, proof_body]
+            return pf.Div(proof_header, *elem.content, attributes={'custom-style': 'Definition'})
 
     def prepare(self, doc):
         self.meta = Meta(doc)

@@ -64,8 +64,7 @@ class Theorem():
             if isinstance(thm_body[0], pf.Para):
                 thm_header.content.extend(thm_body[0].content)
                 thm_body = thm_body[1:]
-            thm_body = pf.Div(*thm_body, attributes={'custom-style': 'Definition'})
-            return [thm_header, thm_body]
+            return pf.Div(thm_header, *thm_body, attributes={'custom-style': 'Definition'})
 
     def prepare(self, doc):
         self.meta = Meta(doc)

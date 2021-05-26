@@ -1,4 +1,5 @@
 import panflute as pf
+from panflute.tools import _get_metadata
 from .meta import Meta
 from . import utils
 from . import word_elements
@@ -14,8 +15,17 @@ class Proof():
                         # attributes={'custom-style': 'Definition Preffix'}
                         )
             ), attributes={'custom-style': 'Definition Term'})
-            qed = [] if self.meta.proofQed == '' else [
-                word_elements.inline_const_commands['tabR'], pf.Str(self.meta.proofQed)]
+
+            # 生成证毕符号，这里允许证毕符号使用完整的Markdown语法来套用样式
+            if self.meta.proofQed != '':
+                qed = [word_elements.inline_const_commands['tabR']]
+                if doc.get_metadata().get('proofQed') and isinstance(doc.metadata['proofQed'], pf.MetaInlines):
+                    qed.extend(doc.metadata['proofQed'].content)
+                else:
+                    qed.append(pf.Str(self.meta.proofQed))
+            else:
+                qed = []
+
             if isinstance(elem.content[-1], pf.Para):
                 elem.content[-1].content.extend(qed)
             else:

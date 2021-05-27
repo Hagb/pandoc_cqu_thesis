@@ -1,9 +1,10 @@
 import panflute as pf
 from .meta import Meta, MetaFilter, metapreparemethod
+from .Number import NumberFilter
 from . import utils
 
 
-class Theorem(MetaFilter):
+class Theorem(MetaFilter, NumberFilter):
     def action(self, elem, doc):
         if isinstance(elem, pf.DefinitionList):
             caption = elem.content[0].term
@@ -28,8 +29,9 @@ class Theorem(MetaFilter):
                     break
             reference = reference[::-1]
 
-            identifier = label['identifier'] or ''
-            nonumber = 'nonumbered' in label['classes']
+            numberinfo = self.getNumberingInfo(label)
+            identifier = numberinfo['identifier']
+            nonumber = not numberinfo['numbering']
             thm_number = [] if nonumber else [
                 # pf.Space,
                 pf.Span(
@@ -73,6 +75,7 @@ class Theorem(MetaFilter):
     def prepare(self, doc, meta):
         self.top_level = meta.chaptersDepth if meta.chapters else ''
         self.chapDelim = self.top_level and meta.chapDelim
+        self.auto_labels = meta.autoThmLabels
         self.section_no = pf.RawInline(
             self.top_level and
             f'''<w:fldSimple w:instr=" STYLEREF {self.top_level} \\s"/>''', format="openxml")

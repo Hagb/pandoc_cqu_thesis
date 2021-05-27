@@ -1,14 +1,16 @@
 import panflute as pf
 from .meta import Meta, MetaFilter, metapreparemethod
+from .Number import NumberFilter
 from . import utils
 
 
-class TableCaptionReplace(MetaFilter):
+class TableCaptionReplace(MetaFilter, NumberFilter):
     @metapreparemethod
     def prepare(self, doc, meta):
         self.top_level = meta.chaptersDepth if meta.chapters else ''
         self.tableSeqName = meta.tableTitle  # 题注前缀的文字和SEQ的内容相同，以便于在Word中产生相同的前缀
         self.chapDelim = self.top_level and meta.chapDelim
+        self.auto_labels = meta.autoTblLabels
         self.section_no = pf.RawInline(
             self.top_level and
             f'''<w:fldSimple w:instr=" STYLEREF {self.top_level} \\s"/>''', format="openxml")
@@ -18,7 +20,7 @@ class TableCaptionReplace(MetaFilter):
         self.table_no2 = pf.RawInline(
             f'''<w:fldSimple w:instr=" SEQ {self.tableSeqName} \\c \\* ARABIC \\s {self.top_level} "/>''',
             format="openxml")
-            # 重复上一个编号
+        # 重复上一个编号
 
     def generateTableNumber(self, identifier=''):
         # 创建表格编号
@@ -60,14 +62,9 @@ class TableCaptionReplace(MetaFilter):
             # 获取题注元素
             captionContent = elem.caption.content[0].content
 
-            # 判断是否编号，是否存在书签
-            # 在这里检测是否需要编号，是否存在标签，以及去掉标签返回剩下的内容
-            isNeedNumber = True
-            identifier = ""
-            Label = utils.stripLabel(captionContent)
-            if Label:
-                identifier = Label['identifier']
-                isNeedNumber = 'nonumbered' not in Label['classes']
+            numberinfo = self.getNumberingInfo(utils.stripLabel(captionContent))
+            isNeedNumber = numberinfo['numbering']
+            identifier = numberinfo['identifier']
 
             # 判断是否存在第二题注
             for item in captionContent:

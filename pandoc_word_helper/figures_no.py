@@ -1,14 +1,14 @@
 import panflute as pf
 from .meta import Meta, MetaFilter, metapreparemethod
+from .Number import NumberFilter
 import re
 
 
-class FigCaptionReplace(MetaFilter):
+class FigCaptionReplace(MetaFilter, NumberFilter):
     math_no = 1
     anchor_re = re.compile(r'{#([^}]+)}')
 
     def action(self, elem, doc):
-
         # 若单独成段的图片没有题注，则对该段落应用Figure样式
         # 注：若采用\Style{xxx} ![]()的方式对单独成段的图片应用样式，该段代码则不会生效，故无需单独处理
         if isinstance(elem, pf.Para):
@@ -21,11 +21,11 @@ class FigCaptionReplace(MetaFilter):
             elem: pf.Image
             # pf.debug("Image!")
 
-            # 若图片无题注，则直接返回图片，不做处理
-            if elem.title == "":
-                return elem
+            numberinfo = self.getNumberingInfo(elem)
+            numbering = numberinfo['numbering']
+            identifier = numberinfo['identifier']
 
-            if '-' in elem.classes or 'unnumbered' in elem.classes:
+            if numbering:
                 new_content = []
             else:
                 new_content = [
@@ -34,12 +34,11 @@ class FigCaptionReplace(MetaFilter):
                     pf.Span(self.section_no,
                             pf.Str(self.chapDelim),
                             self.figure_no,
-                            identifier=elem.identifier if elem.identifier else ""),
+                            identifier=identifier),
                     pf.Str(self.meta.titleDelim)
                 ]
             new_content.append(
-                pf.Span(identifier=elem.identifier +
-                        ':c' if elem.identifier else ""))
+                pf.Span(identifier=identifier and (identifier + ':c')))
 
             for elem1 in elem.content:
                 if isinstance(
@@ -47,16 +46,14 @@ class FigCaptionReplace(MetaFilter):
                 ) and elem1.format == 'tex' and elem1.text == self.meta.secondCaptionSeparator:
                     # 第二题注
                     new_content.append(pf.LineBreak)
-                    if not ('-' in elem.classes or 'unnumbered' in elem.classes):
+                    if numbering:
                         new_content.extend([pf.Str(self.meta.figureTitle2),
                                             self.section_no,
                                             pf.Str(self.chapDelim),
                                             self.figure_no2,
                                             pf.Str(self.meta.titleDelim)])
                     new_content.append(
-                        pf.Span(identifier=elem.identifier +
-                                ':sc' if elem.identifier else ""))
-                    cap2_begin = True
+                        pf.Span(identifier=identifier and (identifier + ':sc')))
                 else:
                     new_content[-1].content.append(elem1)
             elem.content = new_content

@@ -1,4 +1,6 @@
 import panflute as pf
+import abc
+from functools import wraps
 
 
 class Meta:
@@ -52,14 +54,14 @@ class Meta:
     eqSuffix = ')'
 
     # 定理环境相关
-    combineDefinitionTerm = True # 用Word中Crtl Alt Enter产生的能够合并两个段落的特殊段落标记合并定理的编号和内容
+    combineDefinitionTerm = True  # 用Word中Crtl Alt Enter产生的能够合并两个段落的特殊段落标记合并定理的编号和内容
     proof = "证明　"
     proofQed = "□"
 
     theoremSeparator = '　'
     theoremPrefix = '('
     theoremSuffix = ')'
-    theoremNumbering = True
+    autoThmLabels = True
     theorems = {'assumption': '假设',
                 'axiom': '公理',
                 'conjecture': '猜想',
@@ -79,3 +81,23 @@ class Meta:
             data = type(getattr(self, name))(metadata[name]) if hasattr(
                 self, name) else metadata[name]
             setattr(self, name, data)
+
+
+def metapreparemethod(prepare_method):
+    @wraps(prepare_method)
+    def prepare(self, doc):
+        if not self.meta:
+            self.meta = Meta(doc)
+        return prepare_method(self, doc, self.meta)
+    return prepare
+
+class MetaFilter(abc.ABC):
+    meta = None
+
+    @metapreparemethod
+    def prepare(self, doc, meta):
+        pass
+
+    def __init__(self, meta=None):
+        if meta:
+            self.meta = meta

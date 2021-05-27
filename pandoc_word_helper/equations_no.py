@@ -1,5 +1,6 @@
 import panflute as pf
-from .meta import Meta
+from .meta import Meta, MetaFilter, metapreparemethod
+from .Number import NumberFilter
 import copy
 import re
 from . import utils
@@ -7,13 +8,13 @@ top_level = 1
 equation_width = 0.7
 
 
-class MathReplace():
+class MathReplace(MetaFilter, NumberFilter):
     math_no = 1
 
-    def prepare(self, doc):
-        self.meta = Meta(doc)
-        self.top_level = self.meta.chaptersDepth if self.meta.chapters else ''
-        self.chapDelim = self.top_level and self.meta.chapDelim
+    @metapreparemethod
+    def prepare(self, doc, meta):
+        self.top_level = meta.chaptersDepth if meta.chapters else ''
+        self.chapDelim = top_level and meta.chapDelim
         self.section_no = pf.RawInline(
             self.top_level and
             f'''<w:fldSimple w:instr=" STYLEREF {self.top_level} \\s"/>''', format="openxml")
@@ -38,23 +39,18 @@ class MathReplace():
                 continue
             is_math = isinstance(elem1,
                                  pf.Math) and elem1.format == 'DisplayMath'
-            if not is_math and content_group and content_group[-1][0] and \
-                    isinstance(content_group[-1][1][-1], pf.Math):
+            if is_math:
                 attrs = utils.stripLabel(
-                    elem.content[n:], tail=False, strip_inplace=False)
+                    elem.content[n+1:], tail=False, strip_inplace=False)
+                elem1 = [elem1, self.getNumberingInfo(attrs)]
                 if attrs:
-                    has_tag_attr = self.auto_labels and \
-                        not ('notag' in attrs['classes'] or 'nonumbered' in attrs['classes']) or \
-                        'tag' in attrs['classes']
-                    attr = attrs['identifier'] if has_tag_attr or attrs['identifier'] else None
-                    content_group[-1][1][-1] = (content_group[-1][1][-1], attr)
                     n += attrs['strip_len']
-                    continue
-            n += 1
             if content_group:
                 if content_group[-1][0] == is_math:
                     content_group[-1][1].append(elem1)
+                    n += 1
                     continue
+            n += 1
             content_group.append([is_math, [elem1]])
         if len(content_group) == 1 and not content_group[0][0]:
             return
@@ -86,18 +82,8 @@ class MathReplace():
             first_para = False
             rows = []
             for math_elem in elem_group[1]:
-                if isinstance(math_elem, pf.Math):
-                    math_elem = math_elem
-                    notag = not self.auto_labels
-                    tag = ''
-                else:
-                    if isinstance(math_elem[1], str):
-                        notag = False
-                        tag = math_elem[1]
-                    else:
-                        notag = True
-                        tag = ''
-                    math_elem = math_elem[0]
+                tag, notag = math_elem[1]['identifier'], not math_elem[1]['numbering']
+                math_elem = math_elem[0]
                 math_caption = [
                     pf.Str(self.meta.eqPrefix),
                     pf.Span(
@@ -172,7 +158,8 @@ class MathReplace():
             f'<w:tcPr><w:tcW w:w="{50*int(width)}" w:type="pct"/></w:tcPr>',
             format="openxml")
 
-    def __init__(self):
+    def __init__(self, meta=None):
+        super().__init__(meta)
         pass
 
 

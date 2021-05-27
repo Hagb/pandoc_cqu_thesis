@@ -2,13 +2,13 @@ import panflute as pf
 from .meta import Meta
 import copy
 import re
+from . import utils
 top_level = 1
 equation_width = 0.7
 
 
 class MathReplace():
     math_no = 1
-    anchor_re = re.compile(r'{#([^}]+)}')
 
     def prepare(self, doc):
         self.meta = Meta(doc)
@@ -20,6 +20,7 @@ class MathReplace():
         self.equation_no = pf.RawInline(
             f'''<w:fldSimple w:instr=" SEQ Equation \\* ARABIC \\s {self.top_level}"/>''',
             format="openxml")
+        self.auto_labels = self.meta.autoEqnLabels
 
     def action(self, elem, doc):
         # pf.debug('s:', elem)
@@ -28,28 +29,28 @@ class MathReplace():
         origin_type = type(elem)
         rows = []
         content_group = []
-        for elem1 in elem.content:
-            if content_group and content_group[-1][0]:
-                if isinstance(elem1, (pf.Space, pf.SoftBreak)):
-                    continue
-                elif isinstance(elem1, pf.Str) and isinstance(
-                        content_group[-1][1][-1], pf.Math):
-                    if elem1.text == '{}':
-                        content_group[-1][1][-1] = (
-                            content_group[-1][1][-1], None)
-                        continue
-                    elif elem1.text == '{.notag}' or elem1.text == '{-}':
-                        content_group[-1][1][-1] = (
-                            content_group[-1][1][-1], "")
-                        continue
-                    else:
-                        match = self.anchor_re.fullmatch(elem1.text)
-                        if match:
-                            content_group[-1][1][-1] = (
-                                content_group[-1][1][-1], match[1])
-                            continue
+        n = 0
+        while n < len(elem.content):
+            elem1 = elem.content[n]
+            if content_group and content_group[-1][0] and \
+                    isinstance(elem1, (pf.Space, pf.SoftBreak)):
+                n += 1
+                continue
             is_math = isinstance(elem1,
                                  pf.Math) and elem1.format == 'DisplayMath'
+            if not is_math and content_group and content_group[-1][0] and \
+                    isinstance(content_group[-1][1][-1], pf.Math):
+                attrs = utils.stripLabel(
+                    elem.content[n:], tail=False, strip_inplace=False)
+                if attrs:
+                    has_tag_attr = self.auto_labels and \
+                        not ('notag' in attrs['classes'] or 'nonumbered' in attrs['classes']) or \
+                        'tag' in attrs['classes']
+                    attr = attrs['identifier'] if has_tag_attr or attrs['identifier'] else None
+                    content_group[-1][1][-1] = (content_group[-1][1][-1], attr)
+                    n += attrs['strip_len']
+                    continue
+            n += 1
             if content_group:
                 if content_group[-1][0] == is_math:
                     content_group[-1][1].append(elem1)
@@ -87,22 +88,16 @@ class MathReplace():
             for math_elem in elem_group[1]:
                 if isinstance(math_elem, pf.Math):
                     math_elem = math_elem
-                    notag = False
+                    notag = not self.auto_labels
                     tag = ''
                 else:
                     if isinstance(math_elem[1], str):
-                        if math_elem[1]:
-                            tag = math_elem[1]
-                            notag = False
-                        else:
-                            tag = ''
-                            notag = True
-                            # pf.debug('notag')
-                        math_elem = math_elem[0]
-                    else:
-                        math_elem = math_elem[0]
                         notag = False
+                        tag = math_elem[1]
+                    else:
+                        notag = True
                         tag = ''
+                    math_elem = math_elem[0]
                 math_caption = [
                     pf.Str(self.meta.eqPrefix),
                     pf.Span(

@@ -20,9 +20,12 @@ class Meta:
 
     figureTitle = "图 "
     figureTitle2 = "Figure "
+    autoFigLabels = True
     tableTitle = "表 "
     tableTitle2 = "Table "
     titleDelim = ' '  # 题注编号和题注文本直接的分隔符
+    autoTblLabels = True
+    autoEqnLabels = True
 
     # 引用编号时的参数
     figPrefix = "图"
@@ -56,6 +59,7 @@ class Meta:
     theoremSeparator = '　'
     theoremPrefix = '('
     theoremSuffix = ')'
+    theoremNumbering = True
     theorems = {'assumption': '假设',
                 'axiom': '公理',
                 'conjecture': '猜想',

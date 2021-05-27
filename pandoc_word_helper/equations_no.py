@@ -42,7 +42,7 @@ class MathReplace(MetaFilter, NumberFilter):
             if is_math:
                 attrs = utils.stripLabel(
                     elem.content[n+1:], tail=False, strip_inplace=False)
-                if 'raw' in attrs['classes']:
+                if attrs and 'raw' in attrs['classes']:
                     elem1 = pf.Str('$$' + elem1.text + '$$')
                 elem1 = [elem1,
                          self.getNumberingInfo(attrs)

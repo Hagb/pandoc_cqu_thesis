@@ -3,10 +3,10 @@
 # 2. 对代码块添加行号，通过把代码块拆分成若干代码行实现
 
 import panflute as pf
-from .meta import Meta
+from .meta import Meta, MetaFilter
 
 
-class CodeBlock():
+class CodeBlock(MetaFilter):
     def action(self, elem, doc):
         if isinstance(elem, (pf.CodeBlock, pf.Code)):
             elem = self.codeSpaceVisible(elem)
@@ -29,15 +29,9 @@ class CodeBlock():
             elem.text = elem.text.replace(' ', '␣')
         return elem
 
-    def prepare(self, doc):
-        self.meta = Meta(doc)
 
-    def __init__(self) -> None:
-        pass
-
-
-def main(doc=None):
-    replacer = CodeBlock()
+def main(doc=None, meta=None):
+    replacer = CodeBlock(meta=meta)
     return pf.run_filter(replacer.action, prepare=replacer.prepare, doc=doc)
 
 

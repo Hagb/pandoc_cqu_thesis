@@ -87,7 +87,7 @@ block_function_commands = {
 }
 
 
-def main(doc=None):
+def main(doc=None, meta=None):
     replacer = texcommands.ConstTexCommandReplace(
         inline_const_commands, inline_function_commands, block_const_commands, block_function_commands)
     return pf.run_filter(replacer.action, doc=doc)

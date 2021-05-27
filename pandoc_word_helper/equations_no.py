@@ -158,13 +158,10 @@ class MathReplace(MetaFilter, NumberFilter):
             f'<w:tcPr><w:tcW w:w="{50*int(width)}" w:type="pct"/></w:tcPr>',
             format="openxml")
 
-    def __init__(self, meta=None):
-        super().__init__(meta)
-        pass
 
 
-def main(doc=None):
-    replacer = MathReplace()
+def main(doc=None, meta=None):
+    replacer = MathReplace(meta=Meta)
     return pf.run_filter(replacer.action, prepare=replacer.prepare, doc=doc)
 
 

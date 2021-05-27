@@ -76,6 +76,7 @@ class Meta:
                 'theorem': '定理'}
 
     def __init__(self, doc: pf.Doc):
+        pf.debug(123)
         metadata = doc.get_metadata()
         for name in metadata:
             data = type(getattr(self, name))(metadata[name]) if hasattr(
@@ -90,6 +91,7 @@ def metapreparemethod(prepare_method):
             self.meta = Meta(doc)
         return prepare_method(self, doc, self.meta)
     return prepare
+
 
 class MetaFilter(abc.ABC):
     meta = None

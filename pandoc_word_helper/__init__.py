@@ -1,5 +1,5 @@
 import panflute as pf
-from . import meta
+from .meta import Meta
 from . import equations_no
 from . import figures_no
 from . import table_no
@@ -28,10 +28,12 @@ def main(doc=None):
         from_exec = True
     else:
         from_exec = False
+    meta = Meta(doc)
     for mod in (parse_md, sugar_replace, fieldCode, header_convert, theorem,
                 proof, table_no, figures_no, refs, word_elements,
                 horizontal_noindent, codeParsing, equations_no, plainListElem):
-        doc = mod.main(doc=doc)
+        # pf.debug(mod)
+        doc = mod.main(doc=doc, meta=meta)
         if parse_md.parse_only:
             break
     if from_exec:

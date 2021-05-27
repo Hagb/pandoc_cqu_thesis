@@ -1,5 +1,5 @@
 import panflute as pf
-
+import sys
 
 def horizontalNoindentAction(elem, doc):
     if isinstance(elem, pf.HorizontalRule):
@@ -12,7 +12,7 @@ def horizontalNoindentAction(elem, doc):
             ), attributes={'custom-style': 'noindent'})
 
 
-def main(doc=None):
+def main(doc=None, meta=None):
     return pf.run_filter(horizontalNoindentAction, doc=doc)
 
 

@@ -16,7 +16,7 @@ class plainListElemWorkaround():
                 elem.content[n] = pf.Plain(*e.content)
 
 
-def main(doc=None):
+def main(doc=None, meta=None):
     replacer = plainListElemWorkaround()
     return pf.run_filter(replacer.action, doc=doc)
 

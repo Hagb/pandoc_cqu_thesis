@@ -20,7 +20,7 @@ def check_isparse(doc):
     parse_only = doc.get_metadata('parse_only')
 
 
-def main(doc=None):
+def main(doc=None, meta=None):
     replacer = texcommands.ConstTexCommandReplace(
         inline_function_commands=inline_function_commands, block_function_commands=block_function_commands)
     return pf.run_filters([replacer.action], prepare=check_isparse, doc=doc)

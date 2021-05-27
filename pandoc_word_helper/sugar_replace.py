@@ -13,7 +13,7 @@ def suger_replace(elem, doc):
                 return pf.Underline(elem)
 
 
-def main(doc=None):
+def main(doc=None, meta=None):
     return pf.run_filter(suger_replace, doc=doc)
 
 

@@ -1,11 +1,11 @@
 import panflute as pf
 from panflute.tools import _get_metadata
-from .meta import Meta
+from .meta import Meta, MetaFilter
 from . import utils
 from . import word_elements
 
 
-class Proof():
+class Proof(MetaFilter):
     def action(self, elem, doc):
         if isinstance(elem, pf.Div) and 'proof' in elem.classes:
             proof_header = pf.Div(pf.Para(
@@ -34,12 +34,9 @@ class Proof():
                 *elem.content, attributes={'custom-style': 'Definition'})
             return [proof_header, proof_body]
 
-    def prepare(self, doc):
-        self.meta = Meta(doc)
 
-
-def main(doc=None):
-    proof = Proof()
+def main(doc=None, meta=None):
+    proof = Proof(meta=meta)
     return pf.run_filter(proof.action, prepare=proof.prepare, doc=doc)
 
 

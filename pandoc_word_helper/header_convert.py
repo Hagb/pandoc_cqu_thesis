@@ -44,11 +44,10 @@ def headerConvert(elem, doc):
         if elem.identifier:
             elem.content = [pf.Span(*elem.content, identifier=elem.identifier)]
             elem.identifier = ""
-
     return elem
 
 
-def main(doc=None):
+def main(doc=None, meta=None):
     return pf.run_filter(headerConvert, doc=doc)
 
 

@@ -1,14 +1,14 @@
 import panflute as pf
-from .meta import Meta
+from .meta import Meta, MetaFilter, metapreparemethod
 from . import utils
 
 
-class TableCaptionReplace():
-    def prepare(self, doc):
-        self.meta = Meta(doc)
-        self.top_level = self.meta.chaptersDepth if self.meta.chapters else ''
-        self.tableSeqName = self.meta.tableTitle  # 题注前缀的文字和SEQ的内容相同，以便于在Word中产生相同的前缀
-        self.chapDelim = self.top_level and self.meta.chapDelim
+class TableCaptionReplace(MetaFilter):
+    @metapreparemethod
+    def prepare(self, doc, meta):
+        self.top_level = meta.chaptersDepth if meta.chapters else ''
+        self.tableSeqName = meta.tableTitle  # 题注前缀的文字和SEQ的内容相同，以便于在Word中产生相同的前缀
+        self.chapDelim = self.top_level and meta.chapDelim
         self.section_no = pf.RawInline(
             self.top_level and
             f'''<w:fldSimple w:instr=" STYLEREF {self.top_level} \\s"/>''', format="openxml")
@@ -105,8 +105,8 @@ class TableCaptionReplace():
             return [elem, pf.Para(pf.Span()) if self.meta.isParaAfterTable else pf.Null()]
 
 
-def main(doc=None):
-    replacer = TableCaptionReplace()
+def main(doc=None, meta=None):
+    replacer = TableCaptionReplace(meta=meta)
     return pf.run_filter(replacer.action, prepare=replacer.prepare, doc=doc)
 
 

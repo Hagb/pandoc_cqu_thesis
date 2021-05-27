@@ -1,9 +1,9 @@
 import panflute as pf
-from .meta import Meta
+from .meta import Meta, MetaFilter, metapreparemethod
 from . import utils
 
 
-class Theorem():
+class Theorem(MetaFilter):
     def action(self, elem, doc):
         if isinstance(elem, pf.DefinitionList):
             caption = elem.content[0].term
@@ -69,10 +69,10 @@ class Theorem():
                               attributes={'custom-style': 'Definition'})
             return [thm_header, thm_body]
 
-    def prepare(self, doc):
-        self.meta = Meta(doc)
-        self.top_level = self.meta.chaptersDepth if self.meta.chapters else ''
-        self.chapDelim = self.top_level and self.meta.chapDelim
+    @metapreparemethod
+    def prepare(self, doc, meta):
+        self.top_level = meta.chaptersDepth if meta.chapters else ''
+        self.chapDelim = self.top_level and meta.chapDelim
         self.section_no = pf.RawInline(
             self.top_level and
             f'''<w:fldSimple w:instr=" STYLEREF {self.top_level} \\s"/>''', format="openxml")
@@ -83,8 +83,8 @@ class Theorem():
             format="openxml")
 
 
-def main(doc=None):
-    theorem = Theorem()
+def main(doc=None, meta=None):
+    theorem = Theorem(meta=meta)
     return pf.run_filter(theorem.action, prepare=theorem.prepare, doc=doc)
 
 

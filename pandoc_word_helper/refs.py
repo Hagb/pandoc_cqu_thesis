@@ -1,4 +1,4 @@
-from .meta import Meta
+from .meta import Meta, MetaFilter, metapreparemethod
 # find(): 找出文档中所有的书签
 # replace(): 对[@xxx]这样的写法引用书签
 # 可以实现对标题编号的引用
@@ -23,32 +23,32 @@ def refPage(citationId):
                         format="openxml")
 
 
-class refsReplacer():
-    def prepare(self, doc):
+class refsReplacer(MetaFilter):
+    @metapreparemethod
+    def prepare(self, doc, meta):
         self.bookmarks = set()
         self.bookmarks_custom = {}
-        self.meta = Meta(doc)
         # 已知的以书签“内容”作为编号的前缀
         self.knownContentPrefix = {
-            'eq': self.meta.eqnPrefix,
-            'fig': self.meta.figPrefix,
-            'tbl': self.meta.tblPrefix,
-            # 'def':self.meta.?
+            'eq': meta.eqnPrefix,
+            'fig': meta.figPrefix,
+            'tbl': meta.tblPrefix,
+            # 'def':meta.?
         }
         self.knownContentSuffix = {
-            'eq': self.meta.eqnSuffix,
-            'fig': self.meta.figSuffix,
-            'tbl': self.meta.tblSuffix,
-            # 'def':self.meta.?
+            'eq': meta.eqnSuffix,
+            'fig': meta.figSuffix,
+            'tbl': meta.tblSuffix,
+            # 'def':meta.?
         }
         # 已知的以书签“内容”作为“内容”的前缀
         self.knownNumPrefix = {
-            'lst': self.meta.lstPrefix,
-            'sec': self.meta.secPrefix
+            'lst': meta.lstPrefix,
+            'sec': meta.secPrefix
         }
         self.knownNumSuffix = {
-            'lst': self.meta.lstSuffix,
-            'sec': self.meta.secSuffix
+            'lst': meta.lstSuffix,
+            'sec': meta.secSuffix
         }
 
     def find(self, elem, doc=None):
@@ -178,9 +178,8 @@ class refsReplacer():
         return results
 
 
-def main(doc=None):
-
-    refs_replacer = refsReplacer()
+def main(doc=None, meta=None):
+    refs_replacer = refsReplacer(meta=meta)
     return pf.run_filters([refs_replacer.find, refs_replacer.replace], prepare=refs_replacer.prepare, doc=doc)
 
 

@@ -52,11 +52,8 @@ class fieldCode():
                 temp_str = ""
         return result_str + ("</w:r></w:p>" if isBlock else "</w:r>")
 
-    def __init__(self) -> None:
-        pass
 
-
-def main(doc=None):
+def main(doc=None, meta=None):
     replacer = fieldCode()
     return pf.run_filter(replacer.action, doc=doc)
 

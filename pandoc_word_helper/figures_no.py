@@ -1,9 +1,9 @@
 import panflute as pf
-from .meta import Meta
+from .meta import Meta, MetaFilter, metapreparemethod
 import re
 
 
-class FigCaptionReplace():
+class FigCaptionReplace(MetaFilter):
     math_no = 1
     anchor_re = re.compile(r'{#([^}]+)}')
 
@@ -63,11 +63,12 @@ class FigCaptionReplace():
 
             return elem
 
-    def prepare(self, doc):
-        self.meta = Meta(doc)
+    @metapreparemethod
+    def prepare(self, doc, meta):
         self.top_level = self.meta.chaptersDepth if self.meta.chapters else ''
         self.figSeqName = self.meta.figureTitle  # 题注前缀的文字和SEQ的内容相同，以便于在Word中产生相同的前缀
         self.chapDelim = self.top_level and self.meta.chapDelim
+        self.auto_labels = meta.autoFigLabels
         self.section_no = pf.RawInline(
             self.top_level and
             f'''<w:fldSimple w:instr=" STYLEREF {self.top_level} \\s"/>''', format="openxml")
@@ -79,12 +80,9 @@ class FigCaptionReplace():
             format="openxml")
         # 重复上一个编号
 
-    def __init__(self):
-        pass
 
-
-def main(doc=None):
-    replacer = FigCaptionReplace()
+def main(doc=None, meta=None):
+    replacer = FigCaptionReplace(meta=meta)
     return pf.run_filter(replacer.action, prepare=replacer.prepare, doc=doc)
 
 

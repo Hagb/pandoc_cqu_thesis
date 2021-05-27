@@ -79,7 +79,7 @@ class AutoSectionBreak():
         return elem
 
 
-def main(doc=None):
+def main(doc=None, meta=None):
     replacer = AutoSectionBreak()
     return pf.run_filter(replacer.action, doc=doc)
 

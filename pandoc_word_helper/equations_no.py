@@ -42,7 +42,11 @@ class MathReplace(MetaFilter, NumberFilter):
             if is_math:
                 attrs = utils.stripLabel(
                     elem.content[n+1:], tail=False, strip_inplace=False)
-                elem1 = [elem1, self.getNumberingInfo(attrs)]
+                if 'raw' in attrs['classes']:
+                    elem1 = pf.Str('$$' + elem1.text + '$$')
+                elem1 = [elem1,
+                         self.getNumberingInfo(attrs)
+                         ]
                 if attrs:
                     n += attrs['strip_len']
             if content_group:
@@ -157,7 +161,6 @@ class MathReplace(MetaFilter, NumberFilter):
         return pf.RawBlock(
             f'<w:tcPr><w:tcW w:w="{50*int(width)}" w:type="pct"/></w:tcPr>',
             format="openxml")
-
 
 
 def main(doc=None, meta=None):

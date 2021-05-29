@@ -154,7 +154,7 @@ class refsReplacer(MetaFilter):
                 if citationId in self.bookmarks:
                     result = [refContentStr(citationId)]
                 else:
-                    if results and isinstance(results[-1], pf.Citation):
+                    if results and isinstance(results[-1], pf.Cite):
                         results[-1].citations.append(citation)
                     else:
                         cite = pf.Cite()

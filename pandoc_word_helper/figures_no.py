@@ -26,8 +26,6 @@ class FigCaptionReplace(MetaFilter, NumberFilter):
             identifier = numberinfo['identifier']
 
             if numbering:
-                new_content = []
-            else:
                 new_content = [
                     # 题注前缀
                     pf.Str(self.meta.figureTitle),
@@ -37,6 +35,8 @@ class FigCaptionReplace(MetaFilter, NumberFilter):
                             identifier=identifier),
                     pf.Str(self.meta.titleDelim)
                 ]
+            else:
+                new_content = []
             new_content.append(
                 pf.Span(identifier=identifier and (identifier + ':c')))
 

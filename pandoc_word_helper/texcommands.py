@@ -9,12 +9,13 @@ class ConstTexCommandReplace():
     def _parse_tex(self, tex_str, const_commands, function_commands, docinfo):
         re_result = self.tex_re.fullmatch(tex_str.strip())
         if re_result:
-            if re_result[1] in function_commands:
-                return function_commands[re_result[1]](
+            name = re_result[1].lower()
+            if name in function_commands:
+                return function_commands[name](
                     re_result[2][1:-1], docinfo=docinfo) if re_result[2] \
                     else function_commands[re_result[1]](docinfo=docinfo)
-            elif re_result[1] in const_commands:
-                return const_commands[re_result[1]]
+            elif name in const_commands:
+                return const_commands[name]
 
     def action(self, elem, doc: pf.Doc):
         docinfo = [elem, doc]
@@ -35,7 +36,11 @@ class ConstTexCommandReplace():
 
     def __init__(self, inline_const_commands={}, inline_function_commands={},
                  block_const_commands={}, block_function_commands={}):
-        self.inline_const_commands = inline_const_commands
-        self.inline_function_commands = inline_function_commands
-        self.block_const_commands = block_const_commands
-        self.block_function_commands = block_function_commands
+        self.inline_const_commands = {name.lower(): inline_const_commands[name]
+                                      for name in inline_const_commands}
+        self.inline_function_commands = {name.lower(): inline_function_commands[name]
+                                         for name in inline_function_commands}
+        self.block_const_commands = {name.lower(): block_const_commands[name]
+                                     for name in block_const_commands}
+        self.block_function_commands = {name.lower(): block_function_commands[name]
+                                        for name in block_function_commands}

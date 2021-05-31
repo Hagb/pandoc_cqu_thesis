@@ -11,12 +11,12 @@ sec_no_num = '''
 '''
 
 
-# def apply_style_header(elem: pf.Header, style: str):
-#     style_raw = style.replace(' ', '')
-#     elem.content.insert(0,
-#                         pf.RawInline(f'<w:pPr><w:pStyle w:val="{style_raw}"/></w:pPr>',
-#                                      format="openxml"))
-#     return elem
+def apply_style_header(elem: pf.Header, style: str):
+    elem.content.insert(0,
+                        pf.RawInline(f'<w:pPr><w:pStyle w:val="{style}"/></w:pPr>',
+                                     format="openxml")
+                        )
+    return elem
 
 
 appendix = False
@@ -27,7 +27,7 @@ def headerConvert(elem, doc):
     if isinstance(elem, pf.Header):
         if elem.level == 1:
             if 'appendix' in elem.classes:
-                # appendix = True
+                appendix = True
                 elem.attributes.update({'custom-style': "Appendix Text"})
                 elem.classes.append('unnumbered')
             elif 'refs' in elem.classes or 'thank' in elem.classes:
@@ -35,8 +35,8 @@ def headerConvert(elem, doc):
             # else:
             #     appendix = False
         # 暂时用不到
-        # elif appendix:
-        #     apply_style_header(elem, f"Appendix Heading {elem.level}")
+        elif appendix:
+            apply_style_header(elem, f"AppendixHeading{elem.level}")
         # and (elem.level == 1 or not appendix):
         if 'unnumbered' in elem.classes:
             # apply_style_header(elem, f"Unnumbered Heading {elem.level}")

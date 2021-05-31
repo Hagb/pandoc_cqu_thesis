@@ -52,7 +52,7 @@ def includeDoc(path, docinfo=None):
     current_path = docinfo[2].workPath or os.path.abspath('.')
     if ':' not in path:
         path = current_path + '/' + path
-    path = quoteattr(os.path.abspath(path).replace('\\', '\\\\'))
+    path = quoteattr(path.replace('\\', '\\\\'))
     return pf.Div(pf.Para(
         pf.RawInline(
             '<w:pPr><w:ind w:firstLineChars="0" w:firstLine="0"/></w:pPr>'

@@ -20,10 +20,10 @@ def stripLabel(elems, tail=True, strip_inplace = True):
         ''.join(label_strs[::-1] if tail else label_strs))
     if match:
         strip_len = len(label_strs)
-        if strip_len > len(elems):
-            if tail and isinstance(elems[-1], (pf.Space, pf.SoftBreak)):
+        if strip_len + 1 <= len(elems):
+            if tail and isinstance(elems[-strip_len-1], (pf.Space, pf.SoftBreak)):
                 strip_len += 1
-            elif (not tail) and isinstance(elems[0], (pf.Space, pf.SoftBreak)):
+            elif (not tail) and isinstance(elems[strip_len], (pf.Space, pf.SoftBreak)):
                 strip_len += 1
         if strip_inplace:
             target_elems = elems[:-strip_len] if tail else elems[strip_len:]

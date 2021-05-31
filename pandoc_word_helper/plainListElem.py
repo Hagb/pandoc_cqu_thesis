@@ -4,16 +4,22 @@ import sys
 
 class plainListElemWorkaround():
     def action(self, elem, doc):
-        if isinstance(elem, pf.ListItem):
-            self.plainify(elem)
+        if isinstance(elem, (pf.DefinitionList, pf.BulletList, pf.OrderedList)):
+            for list_item in elem.content:
+                self._plainify(list_item)
 
     @classmethod
-    def plainify(self, elem):
+    def _plainify(self, elem):
         for n, e in enumerate(elem.content):
-            if isinstance(e, pf.Div):
-                self.plainify(e)
-            elif isinstance(e, pf.Para):
-                elem.content[n] = pf.Plain(*e.content)
+            if isinstance(e, pf.Div) and '_eqn' not in e.classes:
+                self._plainify(e)
+            elif isinstance(e, (pf.Para, pf.Plain)):
+                elem.content[n] = pf.Para(
+                    pf.RawInline(
+                        '''<w:pPr><w:ind w:firstLineChars="0"/></w:pPr>''',
+                        format="openxml"),
+                    *e.content
+                )
 
 
 def main(doc=None, meta=None):

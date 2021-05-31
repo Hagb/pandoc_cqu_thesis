@@ -102,17 +102,24 @@ class MathReplace(MetaFilter, NumberFilter):
                     *self.tableRow(
                         *self.tableCell(
                             self.tableCellPr(50 * (1 - equation_width)),
-                            pf.Para(pf.Span())
+                            pf.Para(
+                                pf.RawInline('<w:numPr><w:numId w:val="0"/></w:numPr>',
+                                             format="openxml")
+                            )
                         ),
                         *self.tableCell(
                             self.tableCellPr(100 * equation_width),
-                            pf.Div(pf.Para(math_elem),
+                            pf.Div(pf.Para(pf.RawInline('<w:numPr><w:numId w:val="0"/></w:numPr>',
+                                                        format="openxml"),
+                                           math_elem),
                                    attributes={
                                 'custom-style': 'Equation'
                             })),
                         *self.tableCell(
                             self.tableCellPr(50 * (1 - equation_width)),
-                            pf.Div(pf.Para(pf.Span(), *math_caption),
+                            pf.Div(pf.Para(pf.RawInline('<w:numPr><w:numId w:val="0"/></w:numPr>',
+                                                        format="openxml"),
+                                           pf.Span(*math_caption)),
                                    attributes={
                                 'custom-style':
                                 'Equation Caption'

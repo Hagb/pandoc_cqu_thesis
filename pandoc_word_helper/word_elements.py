@@ -49,6 +49,9 @@ def newSectionRaw(paramStr="", docinfo=None):
 
 
 def includeDoc(path, docinfo=None):
+    current_path = docinfo[2].workPath or os.path.abspath('.')
+    if ':' not in path:
+        path = current_path + '/' + path
     path = quoteattr(os.path.abspath(path).replace('\\', '\\\\'))
     return pf.Div(pf.Para(
         pf.RawInline(
@@ -90,7 +93,7 @@ block_function_commands = {
 def main(doc=None, meta=None):
     replacer = texcommands.ConstTexCommandReplace(
         inline_const_commands, inline_function_commands, block_const_commands, block_function_commands)
-    return pf.run_filter(replacer.action, doc=doc)
+    return pf.run_filter(replacer.action, prepare=replacer.prepare, doc=doc)
 
 
 if __name__ == '__main__':

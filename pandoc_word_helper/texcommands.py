@@ -1,8 +1,8 @@
 import panflute as pf
 import re
+from .meta import MetaFilter
 
-
-class ConstTexCommandReplace():
+class ConstTexCommandReplace(MetaFilter):
     tex_re = re.compile(r'\\([^{ ]*)({.*})? ?')
 
     @classmethod
@@ -18,7 +18,7 @@ class ConstTexCommandReplace():
                 return const_commands[name]
 
     def action(self, elem, doc: pf.Doc):
-        docinfo = [elem, doc]
+        docinfo = [elem, doc, self.meta]
         if isinstance(elem, pf.RawBlock):
             new_elem = self._parse_tex(
                 elem.text, self.block_const_commands, self.block_function_commands, docinfo)
@@ -35,7 +35,7 @@ class ConstTexCommandReplace():
         return elem
 
     def __init__(self, inline_const_commands={}, inline_function_commands={},
-                 block_const_commands={}, block_function_commands={}):
+                 block_const_commands={}, block_function_commands={}, meta=None):
         self.inline_const_commands = {name.lower(): inline_const_commands[name]
                                       for name in inline_const_commands}
         self.inline_function_commands = {name.lower(): inline_function_commands[name]
@@ -44,3 +44,4 @@ class ConstTexCommandReplace():
                                      for name in block_const_commands}
         self.block_function_commands = {name.lower(): block_function_commands[name]
                                         for name in block_function_commands}
+        super().__init__(meta)

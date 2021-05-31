@@ -75,6 +75,8 @@ class Meta:
                 'remark': '注释',
                 'theorem': '定理'}
 
+    workPath = ''
+
     def __init__(self, doc: pf.Doc):
         metadata = doc.get_metadata()
         for name in metadata:
@@ -102,3 +104,4 @@ class MetaFilter(abc.ABC):
     def __init__(self, meta=None):
         if meta:
             self.meta = meta
+

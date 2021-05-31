@@ -24,7 +24,6 @@ class MathReplace(MetaFilter, NumberFilter):
         self.auto_labels = self.meta.autoEqnLabels
 
     def action(self, elem, doc):
-        # pf.debug('s:', elem)
         if not isinstance(elem, (pf.Para, pf.Plain)):
             return
         origin_type = type(elem)
@@ -65,7 +64,6 @@ class MathReplace(MetaFilter, NumberFilter):
                 return
             if isinstance(parent_elem, (pf.ListItem, pf.DefinitionItem)):
                 noindent = False
-                pf.debug(elem)
             parent_elem = parent_elem.parent
 
         # 开始生成输出表格
@@ -103,21 +101,21 @@ class MathReplace(MetaFilter, NumberFilter):
                         *self.tableCell(
                             self.tableCellPr(50 * (1 - equation_width)),
                             pf.Para(
-                                pf.RawInline('<w:numPr><w:numId w:val="0"/></w:numPr>',
-                                             format="openxml")
+                                pf.RawInline('<w:pPr><w:numPr><w:numId w:val="0"/></w:numPr></w:pPr>',
+                                             format="openxml"),
+                                pf.Span()
                             )
                         ),
                         *self.tableCell(
                             self.tableCellPr(100 * equation_width),
-                            pf.Div(pf.Para(pf.RawInline('<w:numPr><w:numId w:val="0"/></w:numPr>',
-                                                        format="openxml"),
-                                           math_elem),
-                                   attributes={
+                            pf.Div(pf.Para(
+                                pf.Span(math_elem)),
+                                attributes={
                                 'custom-style': 'Equation'
                             })),
                         *self.tableCell(
                             self.tableCellPr(50 * (1 - equation_width)),
-                            pf.Div(pf.Para(pf.RawInline('<w:numPr><w:numId w:val="0"/></w:numPr>',
+                            pf.Div(pf.Para(pf.RawInline('<w:pPr><w:numPr><w:numId w:val="0"/></w:numPr></w:pPr>',
                                                         format="openxml"),
                                            pf.Span(*math_caption)),
                                    attributes={
@@ -126,9 +124,7 @@ class MathReplace(MetaFilter, NumberFilter):
                             }))
                     )])
                 self.math_no += 1
-            elem.extend(self.table(*rows))
-            # pf.debug(elem)
-        # pf.debug(elem)
+            elem.append(pf.Div(*self.table(*rows), classes=['_eqn']))
         return elem
 
     @staticmethod

@@ -3,6 +3,8 @@ import panflute as pf
 import sys
 import os
 from xml.sax.saxutils import quoteattr
+import locale
+from datetime import date
 
 inline_const_commands = {
     r'newLine':
@@ -69,6 +71,44 @@ def metadataBlock(name, docinfo):
         return pf.Para(*data.content)
 
 
+def get_date(meta):
+    if hasattr(meta, 'date_'):
+        return meta.date_
+    else:
+        pf.debug(*map(int, meta.date.split('-')[:2]))
+        date_strs = list(map(int, meta.date.split('-')))
+        if len(date_strs) == 2:
+            date_strs.append(1)
+        date_ = date.fromisocalendar(
+            year=date_strs[0], month=date_strs[1], day=date_strs[2])
+        pf.debug(date_)
+        setattr(meta, 'date_', date_)
+        return date_
+
+
+def ccoverdate(arg, docinfo):
+    date_ = get_date(docinfo[2])
+    return pf.Str(f'{date_.year}年{date_.month}月')
+
+
+def ecoverdate(arg, docinfo):
+    lc_time_backup = locale.getlocale(locale.LC_TIME)
+    locale.setlocale(locale.LC_TIME, (None, None))
+    date_ = get_date(docinfo[2])
+    elem = pf.Str(date_.strftime('%B %Y'))
+    locale.setlocale(locale.LC_TIME, lc_time_backup)
+    return elem
+
+
+def keywords(title, sep, keywords_meta):
+    content = [pf.Span(pf.Str(title), attributes={'custom-style': 'Key Word'})]
+    for n, i in enumerate(keywords_meta):
+        if n:
+            content.append(pf.Str(sep))
+        content.extend(i.content)
+    return content
+
+
 null_para = pf.Para(pf.Span())
 
 
@@ -78,7 +118,11 @@ inline_function_commands = {
     'refs': lambda x, docinfo=None: pf.RawInline(f'<w:fldSimple w:instr=" REF {x} \\h "/>', format="openxml"),
     'Style': lambda x, docinfo=None: pf.RawInline(f'''<w:pPr><w:pStyle w:val="{x}"/></w:pPr>''', format='openxml'),
     'metadata': lambda name, docinfo: list(docinfo[1].metadata[name].content),
-    'metadataStr': lambda name, docinfo: pf.Str(str(docinfo[1].get_metadata(name)))
+    'metadataStr': lambda name, docinfo: pf.Str(str(docinfo[1].get_metadata(name))),
+    'cdate': ccoverdate,
+    'edate': ecoverdate,
+    'ckeywords': lambda x, docinfo: keywords('关键词：', '，', docinfo[1].metadata['keywords']),
+    'ekeywords': lambda x, docinfo: keywords('Keywords: ', ', ', docinfo[1].metadata['keywords-en'])
 }
 
 block_function_commands = {

@@ -27,7 +27,9 @@ class ConstTexCommandReplace(MetaFilter):
             else:
                 new_elem = self._parse_tex(
                     elem.text, self.inline_const_commands, self.inline_function_commands, docinfo)
-                if new_elem:
+                if isinstance(new_elem, list):
+                    return pf.Para(*new_elem)
+                elif new_elem:
                     return pf.Para(new_elem)
         elif isinstance(elem, pf.RawInline):
             return self._parse_tex(elem.text, self.inline_const_commands, self.inline_function_commands, docinfo)

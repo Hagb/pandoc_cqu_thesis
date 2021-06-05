@@ -15,6 +15,7 @@ from . import horizontal_noindent
 from . import theorem
 from . import proof
 from . import plainListElem
+from . import cleanTitleMeta
 import sys
 import panflute as pf
 
@@ -31,7 +32,8 @@ def main(doc=None):
     meta = Meta(doc)
     for mod in (parse_md, sugar_replace, fieldCode, header_convert, theorem,
                 proof, table_no, figures_no, refs, word_elements,
-                horizontal_noindent, codeParsing, equations_no, plainListElem):
+                horizontal_noindent, codeParsing, equations_no, plainListElem,
+                cleanTitleMeta):
         # pf.debug(mod)
         doc = mod.main(doc=doc, meta=meta)
         if parse_md.parse_only:

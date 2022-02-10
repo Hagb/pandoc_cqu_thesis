@@ -17,5 +17,5 @@ class NumberFilter(abc.ABC):
         identifier = attr.get('identifier', '') or ''
         classes = attr.get('classes', set())
         numbering = (identifier or self.auto_labels or 'tag' in classes) and \
-            ('notag' not in classes and 'nonumbered' not in classes)
+            ('notag' not in classes and 'unnumbered' not in classes)
         return {'identifier': identifier, 'numbering': numbering}

@@ -31,8 +31,8 @@ class Theorem(MetaFilter, NumberFilter):
 
             numberinfo = self.getNumberingInfo(label)
             identifier = numberinfo['identifier']
-            nonumber = not numberinfo['numbering']
-            thm_number = [] if nonumber else [
+            unnumber = not numberinfo['numbering']
+            thm_number = [] if unnumber else [
                 # pf.Space,
                 pf.Span(
                     self.section_no,

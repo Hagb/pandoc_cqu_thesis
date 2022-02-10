@@ -31,6 +31,6 @@ def stripLabel(elems, tail=True, strip_inplace = True):
             elems.extend(target_elems)
         return {
             'identifier': match[1+2] or match[1] or '',
-            'classes': [i[1:] or 'nonumbered' for i in match.captures(2) + match.captures(2+2)],
+            'classes': [i[1:] or 'unnumbered' for i in match.captures(2) + match.captures(2+2)],
             'strip_len': strip_len
         }

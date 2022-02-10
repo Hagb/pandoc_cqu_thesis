@@ -1,17 +1,16 @@
 [tool.poetry]
-name = "pandoc_word_helper"
-version = "0.14.6"
+name = "pandoc_cqu_thesis"
+version = "0.14.7"
 description = ""
 authors = ["Hagb Green <hagb_green@qq.com>", "ilcpm <ilcpm@outlook.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
-pip = ">=20.0.0"
 panflute = ">=2.0"
 regex = "^2021.4.4"
 
 [tool.poetry.scripts]
-pandoc_word_helper = 'pandoc_word_helper:main'
+pandoc_cqu_thesis = 'pandoc_cqu_thesis:main'
 
 [tool.poetry.dev-dependencies]
 

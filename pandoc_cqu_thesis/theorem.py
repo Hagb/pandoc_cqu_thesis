@@ -7,69 +7,76 @@ from . import utils
 class Theorem(MetaFilter, NumberFilter):
     def action(self, elem, doc):
         if isinstance(elem, pf.DefinitionList):
-            caption = elem.content[0].term
-            label = utils.stripLabel(caption)
-            if not label:
-                return
-            for i in self.meta.theorems:
-                if i in label['classes']:
-                    thm = i
-                    break
-            else:
-                return
-
-            reference = []
-            for i in caption[::-1]:
-                if isinstance(i, pf.Cite):
-                    reference.append(i)
-                    caption.pop()
-                elif isinstance(i, pf.Space):
-                    caption.pop()
+            content_result = []
+            for content in elem.content:
+                caption = content.term
+                label = utils.stripLabel(caption)
+                if not label:
+                    content_result.append(content)
+                    continue
+                for i in self.meta.theorems:
+                    if i in label['classes']:
+                        thm = i
+                        break
                 else:
-                    break
-            reference = reference[::-1]
+                    content_result.append(content)
+                    continue
 
-            numberinfo = self.getNumberingInfo(label)
-            identifier = numberinfo['identifier']
-            unnumber = not numberinfo['numbering']
-            thm_number = [] if unnumber else [
-                # pf.Space,
-                pf.Span(
-                    self.section_no,
-                    pf.Str(self.chapDelim),
-                    self.theoremNumber(thm),
-                    identifier=identifier,
-                    attributes={'_prefix': self.meta.theorems[thm]}
-                ),
-                # pf.Space
-            ]
-            thm_prefix = pf.Span(
-                pf.Str(self.meta.theorems[thm]),
-                *thm_number,
-                # attributes={'custom-style': 'Definition Preffix'}
-            )
-            caption_elems = [] if not caption else [
-                pf.Str(self.meta.theoremPrefix),
-                pf.Span(
-                    *caption,
-                    identifier=identifier and (identifier + ':c'),
-                    # attributes={'custom-style': 'Definition Title'}
-                ),
-                *reference,
-                pf.Str(self.meta.theoremSuffix)
-            ]
-            thm_header = pf.Div(pf.Para(
-                pf.Span() if not self.meta.combineDefinitionTerm else pf.RawInline(
-                    r'<w:pPr><w:rPr><w:vanish/><w:specVanish/></w:rPr></w:pPr>', format='openxml'),
-                thm_prefix,
-                *caption_elems,
-                pf.Str(self.meta.theoremSeparator)),
-                attributes={'custom-style': 'Definition Term'}
-            )
-            thm_body = pf.Div(*[pf.Para(*i.content[0].content) if isinstance(i.content[0], pf.Plain)
-                                else i.content[0] for i in elem.content[0].definitions],
-                              attributes={'custom-style': 'Definition'})
-            return [thm_header, thm_body]
+                reference = []
+                for i in caption[::-1]:
+                    if isinstance(i, pf.Cite):
+                        reference.append(i)
+                        caption.pop()
+                    elif isinstance(i, pf.Space):
+                        caption.pop()
+                    else:
+                        break
+                reference = reference[::-1]
+
+                numberinfo = self.getNumberingInfo(label)
+                identifier = numberinfo['identifier']
+                unnumber = not numberinfo['numbering']
+                thm_number = [] if unnumber else [
+                    # pf.Space,
+                    pf.Span(
+                        self.section_no,
+                        pf.Str(self.chapDelim),
+                        self.theoremNumber(thm),
+                        identifier=identifier,
+                        attributes={'_prefix': self.meta.theorems[thm]}
+                    ),
+                    # pf.Space
+                ]
+                thm_prefix = pf.Span(
+                    pf.Str(self.meta.theorems[thm]),
+                    *thm_number,
+                    # attributes={'custom-style': 'Definition Preffix'}
+                )
+                caption_elems = [] if not caption else [
+                    pf.Str(self.meta.theoremPrefix),
+                    pf.Span(
+                        *caption,
+                        identifier=identifier and (identifier + ':c'),
+                        # attributes={'custom-style': 'Definition Title'}
+                    ),
+                    *reference,
+                    pf.Str(self.meta.theoremSuffix)
+                ]
+                thm_header = pf.Div(pf.Para(
+                    pf.Span() if not self.meta.combineDefinitionTerm else pf.RawInline(
+                        r'<w:pPr><w:rPr><w:vanish/><w:specVanish/></w:rPr></w:pPr>', format='openxml'),
+                    thm_prefix,
+                    *caption_elems,
+                    pf.Str(self.meta.theoremSeparator)),
+                    attributes={'custom-style': 'Definition Term'}
+                )
+                thm_body = pf.Div(*[pf.Para(*i.content[0].content) if isinstance(i.content[0], pf.Plain)
+                                    else i.content[0] for i in content.definitions],
+                                  attributes={'custom-style': 'Definition'})
+
+                content_result.append(thm_header)
+                content_result.append(thm_body)
+            return content_result
 
     @metapreparemethod
     def prepare(self, doc, meta):

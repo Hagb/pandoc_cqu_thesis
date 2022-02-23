@@ -72,15 +72,13 @@ def metadataBlock(name, docinfo):
 
 
 def get_date(meta):
-    if hasattr(meta, 'date_'):
-        return meta.date_
+    if hasattr(meta, 'date'):
+        return date.fromisoformat(meta.date)
     else:
-        pf.debug(*map(int, meta.date.split('-')[:2]))
         date_strs = list(map(int, meta.date.split('-')))
         if len(date_strs) == 2:
             date_strs.append(1)
-        date_ = date.fromisocalendar(
-            year=date_strs[0], month=date_strs[1], day=date_strs[2])
+        date_ = date(year=date_strs[0], month=date_strs[1], day=date_strs[2])
         pf.debug(date_)
         setattr(meta, 'date_', date_)
         return date_

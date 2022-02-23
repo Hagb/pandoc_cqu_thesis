@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pandoc_cqu_thesis"
-version = "0.15.1"
+version = "0.15.2"
 description = "用于重庆大学毕业论文的 pandoc filter"
 authors = ["Hagb Green <hagb@hagb.name>", "ilcpm <ilcpm@outlook.com>"]
 readme = "README.md"

@@ -12,14 +12,14 @@ class Theorem(MetaFilter, NumberFilter):
                 caption = content.term
                 label = utils.stripLabel(caption)
                 if not label:
-                    content_result.append(content)
+                    content_result.append(pf.DefinitionList(content))
                     continue
                 for i in self.meta.theorems:
                     if i in label['classes']:
                         thm = i
                         break
                 else:
-                    content_result.append(content)
+                    content_result.append(pf.DefinitionList(content))
                     continue
 
                 reference = []

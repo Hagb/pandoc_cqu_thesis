@@ -10,7 +10,8 @@ class plainListElemWorkaround():
 
     @classmethod
     def _plainify(self, elem):
-        for n, e in enumerate(elem.content):
+        content = elem.container if isinstance(elem, pf.DefinitionItem) else elem.content
+        for n, e in enumerate(content):
             if isinstance(e, pf.Div) and '_eqn' not in e.classes:
                 self._plainify(e)
             elif isinstance(e, (pf.Para, pf.Plain)):

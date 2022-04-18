@@ -9,7 +9,7 @@ import panflute as pf
 
 
 def refNumStr(citationId: str):
-    return pf.RawInline(f'<w:fldSimple w:instr=" REF {citationId} \\r \\h "/>',
+    return pf.RawInline(f'<w:fldSimple w:instr=" REF {citationId} \\r \\h \\t "/>',
                         format="openxml")
 
 

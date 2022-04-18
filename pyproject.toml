@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pandoc_cqu_thesis"
-version = "0.15.2"
+version = "0.15.3"
 description = "用于重庆大学毕业论文的 pandoc filter"
 authors = ["Hagb Green <hagb@hagb.name>", "ilcpm <ilcpm@outlook.com>"]
 readme = "README.md"
@@ -9,7 +9,7 @@ keywords = ["cqu", "Chongqing University", "pandoc"]
 repository = "https://github.com/Hagb/pandoc_cqu_thesis"
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.7"
 panflute = ">=2.0"
 regex = "^2021.4.4"
 

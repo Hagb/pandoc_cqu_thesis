@@ -61,8 +61,6 @@ class FigCaptionReplace(MetaFilter, NumberFilter):
                 elem.caption.content[0].content = new_content
             else:
                 pf.debug("What is the caption of this figure?", elem)
-            # elem.content = new_content
-            pf.debug(elem)
             return elem
 
     @metapreparemethod

@@ -17,9 +17,8 @@ class FigCaptionReplace(MetaFilter, NumberFilter):
                     if elem.content[0].title == "":
                         return pf.Div(elem, attributes={'custom-style': 'Figure'})
 
-        if isinstance(elem, pf.Image):
-            elem: pf.Image
-            # pf.debug("Image!")
+        if isinstance(elem, pf.Figure):
+            elem: pf.Figure
 
             numberinfo = self.getNumberingInfo(elem)
             numbering = numberinfo['numbering']
@@ -40,24 +39,30 @@ class FigCaptionReplace(MetaFilter, NumberFilter):
             new_content.append(
                 pf.Span(identifier=identifier and (identifier + ':c')))
 
-            for elem1 in elem.content:
-                if isinstance(
-                        elem1, pf.RawInline
-                ) and elem1.format == 'tex' and elem1.text == self.meta.secondCaptionSeparator:
-                    # 第二题注
-                    new_content.append(pf.LineBreak)
-                    if numbering:
-                        new_content.extend([pf.Str(self.meta.figureTitle2),
-                                            self.section_no,
-                                            pf.Str(self.chapDelim),
-                                            self.figure_no2,
-                                            pf.Str(self.meta.titleDelim)])
-                    new_content.append(
-                        pf.Span(identifier=identifier and (identifier + ':sc')))
-                else:
-                    new_content[-1].content.append(elem1)
-            elem.content = new_content
-
+            if len(elem.caption.content) == 0:
+                elem.caption.content = pf.Plain(*new_content)
+            elif len(elem.caption.content) != 0 and isinstance(elem.caption.content[0], pf.Plain):
+                for elem1 in elem.caption.content[0].content:
+                    if isinstance(
+                            elem1, pf.RawInline
+                    ) and elem1.format == 'tex' and elem1.text == self.meta.secondCaptionSeparator:
+                        # 第二题注
+                        new_content.append(pf.LineBreak)
+                        if numbering:
+                            new_content.extend([pf.Str(self.meta.figureTitle2),
+                                                self.section_no,
+                                                pf.Str(self.chapDelim),
+                                                self.figure_no2,
+                                                pf.Str(self.meta.titleDelim)])
+                        new_content.append(
+                            pf.Span(identifier=identifier and (identifier + ':sc')))
+                    else:
+                        new_content[-1].content.append(elem1)
+                elem.caption.content[0].content = new_content
+            else:
+                pf.debug("What is the caption of this figure?", elem)
+            # elem.content = new_content
+            pf.debug(elem)
             return elem
 
     @metapreparemethod
